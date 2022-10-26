@@ -25,45 +25,55 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install Qt
-            uses: jurplel/install-qt-action@v2
-            with:
-              version:      ${{ env.QT_VERSION }}
-              host:         ${{matrix.os}}
-              target:       desktop
-              dir:          ${{ runner.temp }}
-              setup-python: false
+      uses: jurplel/install-qt-action@v2
+      with:
+        version:      ${{ env.QT_VERSION }}
+        host:         ${{matrix.os}}
+        target:       desktop
+        dir:          ${{ runner.temp }}
+        setup-python: false
               
     - name: Create building folder
       run: |
         mkdir ${{ github.workspace }}/src/build
-    - name: Build and compile
+    - name: Build the geometry viewer
       run: |
         cmake -DBUILD_VIEW_SHARED_LIB="OFF" ../
         cmake --build . --target install
       working-directory: ${{ github.workspace }}/src/build
-      
-    - name: Zip build on windows
-        working-directory: ${{ github.workspace }}/src/build
-        if: startsWith(matrix.os, 'windows'):
-        run:  |
-              7z a geometryViewer-${{ matrix.os }}.zip GeometryViewer
-              
-    - name: Tar build on linux
-        working-directory: ${{ github.workspace }}/src/build
-        if: !startsWith(matrix.os, 'windows'):
-        run:  |
-              tar -cvf geometryViewer-${{ matrix.os }}.tar GeometryViewer        
 
-    - name: Save build artifact on windows
+    - name: Build the PenRed shared lib
+      run: |
+        git clone https://github.com/PenRed/PenRed
+        mkdir ${{ github.workspace }}/src/build/PenRed/src/build
+        cd ${{ github.workspace }}/src/build/PenRed/src/build
+        cmake -DBUILD_C_BINDS=ON -DWITH_NATIVE=ON -DWITH_DICOM=OFF -DWITH_MULTI_THREADING=ON -DWITH_MPI=OFF -DWITH_LB=OFF -DDEVELOPMENT_WARNINGS=OFF ../
+        cmake --build . --target install
+      working-directory: ${{ github.workspace }}/src/build
+
+    - if: startsWith(matrix.os, 'windows')
+      name: Zip build on windows
+      working-directory: ${{ github.workspace }}/src/build
+      run:  |
+        7z a geometryViewer-${{ matrix.os }}.zip GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView*
+
+    - if: startsWith(matrix.os, 'windows') == false
+      name: Tar build on linux
+      working-directory: ${{ github.workspace }}/src/build
+      run:  |
+        tar -cvf geometryViewer-${{ matrix.os }}.tar GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView*
+
+    - if: startsWith(matrix.os, 'windows')
+      name: Save build artifact on windows
       uses: actions/upload-artifact@master
-      if: startsWith(matrix.os, 'windows'):
+
       with:
         name: geometryViewer-${{ matrix.os }}.zip
         path: ${{ github.workspace }}/src/build      
-
-    - name: Save build artifact on linux
+        
+    - if: startsWith(matrix.os, 'windows') == false
+      name: Save build artifact on linux
       uses: actions/upload-artifact@master
-      if: startsWith(matrix.os, 'windows'):
       with:
         name: geometryViewer-${{ matrix.os }}.tar
         path: ${{ github.workspace }}/src/build      
