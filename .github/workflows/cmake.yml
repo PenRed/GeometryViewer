@@ -40,7 +40,7 @@ jobs:
         mkdir ${{ github.workspace }}/src/build
     - name: Build the geometry viewer
       run: |
-        cmake -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
+        cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
         cmake --build .
       working-directory: ${{ github.workspace }}/src/build
 
@@ -95,7 +95,7 @@ jobs:
         mkdir ${{ github.workspace }}/src/build
     - name: Build the geometry viewer
       run: |
-        cmake -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
+        cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
         cmake --build .
       working-directory: ${{ github.workspace }}/src/build
 
@@ -111,6 +111,7 @@ jobs:
     - name: Move the library
       working-directory: ${{ github.workspace }}/src/build
       run:  |
+        move Release/GeometryViewer.exe GeometryViewer.exe
         move PenRed/src/bindings/C/viewers/geometry/geoView_C.dll libgeoView_C.dll
         
     - name: Save build artifact
