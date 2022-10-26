@@ -11,16 +11,13 @@ env:
   BUILD_TYPE:   Release
   QT_VERSION:   5.15.2
 jobs:
-  build:
 
-    name: ${{matrix.name}}
-    runs-on: ${{matrix.os}}
-    strategy:
+  buildLinux:
+    name: Build on Linux
+    runs-on: ubuntu-latest
+    strategy: 
       fail-fast: false
-      matrix:
-          os: [ubuntu-latest,windows-latest]
-          name: [linux,windows]
-            
+
     steps:
     - uses: actions/checkout@v2
 
@@ -28,7 +25,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version:      ${{ env.QT_VERSION }}
-        host:         ${{ matrix.name }}
+        host:         linux
         target:       desktop
         dir:          ${{ runner.temp }}
         setup-python: false
@@ -39,7 +36,7 @@ jobs:
     - name: Build the geometry viewer
       run: |
         cmake -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
-        cmake --build . --target install
+        cmake --build .
       working-directory: ${{ github.workspace }}/src/build
 
     - name: Build the PenRed shared lib
@@ -51,31 +48,63 @@ jobs:
         cmake --build . --target install
       working-directory: ${{ github.workspace }}/src/build
 
-    - if: startsWith(matrix.os, 'windows')
-      name: Zip build on windows
+    - name: Tar build
+      working-directory: ${{ github.workspace }}/src/build
+      run:  |
+        tar -cvf geometryViewer-${{ matrix.os }}.tar GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView* 
+        
+    - name: Save build artifact on linux
+      uses: actions/upload-artifact@master
+      with:
+        name: geometryViewer-${{ matrix.os }}.tar
+        path: ${{ github.workspace }}/src/build
+
+  buildWindows:
+
+    name: Build on Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+            
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version:      ${{ env.QT_VERSION }}
+        host:         windows
+        target:       desktop
+        dir:          ${{ runner.temp }}
+        setup-python: false
+              
+    - name: Create building folder
+      run: |
+        mkdir ${{ github.workspace }}/src/build
+    - name: Build the geometry viewer
+      run: |
+        cmake -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
+        cmake --build .
+      working-directory: ${{ github.workspace }}/src/build
+
+    - name: Build the PenRed shared lib
+      run: |
+        git clone https://github.com/PenRed/PenRed
+        mkdir ${{ github.workspace }}/src/build/PenRed/src/build
+        cd ${{ github.workspace }}/src/build/PenRed/src/build
+        cmake -DBUILD_C_BINDS=ON -DWITH_NATIVE=ON -DWITH_DICOM=OFF -DWITH_MULTI_THREADING=ON -DWITH_MPI=OFF -DWITH_LB=OFF -DDEVELOPMENT_WARNINGS=OFF ../
+        cmake --build . --target install
+      working-directory: ${{ github.workspace }}/src/build
+
+    - name: Zip build on windows
       working-directory: ${{ github.workspace }}/src/build
       run:  |
         7z a geometryViewer-${{ matrix.os }}.zip GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView*
 
-    - if: startsWith(matrix.os, 'windows') == false
-      name: Tar build on linux
-      working-directory: ${{ github.workspace }}/src/build
-      run:  |
-        tar -cvf geometryViewer-${{ matrix.os }}.tar GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView*
-
-    - if: startsWith(matrix.os, 'windows')
-      name: Save build artifact on windows
+    - name: Save build artifact on windows
       uses: actions/upload-artifact@master
-
       with:
         name: geometryViewer-${{ matrix.os }}.zip
-        path: ${{ github.workspace }}/src/build      
-        
-    - if: startsWith(matrix.os, 'windows') == false
-      name: Save build artifact on linux
-      uses: actions/upload-artifact@master
-      with:
-        name: geometryViewer-${{ matrix.os }}.tar
-        path: ${{ github.workspace }}/src/build      
+        path: ${{ github.workspace }}/src/build
 
       
