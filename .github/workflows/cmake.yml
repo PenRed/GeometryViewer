@@ -113,16 +113,13 @@ jobs:
     - name: Move the library
       working-directory: ${{ github.workspace }}/src/build
       run:  |
-        move Release/GeometryViewer.exe GeometryViewer.exe
-        move Release/*.dll ${{ github.workspace }}/src/build/
-        move PenRed/src/bindings/C/viewers/geometry/geoView_C.dll libgeoView_C.dll
+        move PenRed/src/bindings/C/viewers/geometry/geoView_C.dll Release/libgeoView_C.dll
         
     - name: Save build artifact
       uses: actions/upload-artifact@master
       with:
         name: geometryViewer-${{ matrix.os }}
         path: | 
-          ${{ github.workspace }}\src\build\GeometryViewer.exe
-          ${{ github.workspace }}\src\build\*.dll
+          ${{ github.workspace }}\src\build\Release
 
       
