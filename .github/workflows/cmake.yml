@@ -111,7 +111,7 @@ jobs:
     - name: Move the library
       working-directory: ${{ github.workspace }}/src/build
       run:  |
-        mv PenRed/src/bindings/C/viewers/geometry/libgeoView* .
+        move PenRed/src/bindings/C/viewers/geometry/libgeoView* .
         
     - name: Save build artifact
       uses: actions/upload-artifact@master
