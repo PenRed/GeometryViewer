@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
           os: [ubuntu-latest,windows-latest]
-          name: [Ubuntu,Windows]
+          name: [ubuntu,windows]
             
     steps:
     - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version:      ${{ env.QT_VERSION }}
-        host:         ${{matrix.os}}
+        host:         ${{ matrix.name }}
         target:       desktop
         dir:          ${{ runner.temp }}
         setup-python: false
