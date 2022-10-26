@@ -9,7 +9,7 @@ on:
 
 env:
   BUILD_TYPE:   Release
-  QT_VERSION:   5.15.2
+  QT_VERSION:   6.2.*
 jobs:
 
   buildLinux:
