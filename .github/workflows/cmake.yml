@@ -97,6 +97,9 @@ jobs:
       run: |
         cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
         cmake --build . --config Release
+        copy C:\Windows\System32\Qt5Widgets.dll Qt5Widgets.dll
+        copy C:\Windows\System32\Qt5Gui.dll Qt5Gui.dll
+        copy C:\Windows\System32\Qt5Core.dll Qt5Core.dll
       working-directory: ${{ github.workspace }}/src/build
 
     - name: Build the PenRed shared lib
@@ -120,6 +123,6 @@ jobs:
         name: geometryViewer-${{ matrix.os }}
         path: | 
           ${{ github.workspace }}\src\build\GeometryViewer.exe
-          ${{ github.workspace }}\src\build\libgeoView_C.dll
+          ${{ github.workspace }}\src\build\*.dll
 
       
