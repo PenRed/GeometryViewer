@@ -14,9 +14,11 @@ jobs:
 
   buildLinux:
     name: Build on Linux
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy: 
       fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
 
     steps:
     - uses: actions/checkout@v2
@@ -57,7 +59,7 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: geometryViewer-${{ matrix.os }}.tar
-        path: ${{ github.workspace }}/src/build
+        path: ${{ github.workspace }}/src/build/geometryViewer-${{ matrix.os }}.tar
 
   buildWindows:
 
@@ -99,12 +101,12 @@ jobs:
     - name: Zip build on windows
       working-directory: ${{ github.workspace }}/src/build
       run:  |
-        7z a geometryViewer-${{ matrix.os }}.zip GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView*
+        7z a geometryViewer-windows.zip GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView*
 
     - name: Save build artifact on windows
       uses: actions/upload-artifact@master
       with:
-        name: geometryViewer-${{ matrix.os }}.zip
+        name: geometryViewer-windows.zip
         path: ${{ github.workspace }}/src/build
 
       
