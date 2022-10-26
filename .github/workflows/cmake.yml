@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
           os: [ubuntu-latest,windows-latest]
-          name: [GCC,MSVS]
+          name: [linux,windows]
             
     steps:
     - uses: actions/checkout@v2
