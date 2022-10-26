@@ -30,8 +30,11 @@ jobs:
         host:         linux
         target:       desktop
         dir:          ${{ runner.temp }}
-        setup-python: false
-              
+        setup-python: 'true'
+        install-deps: 'true'
+        cache: 'false'
+        set-env: 'true'
+
     - name: Create building folder
       run: |
         mkdir ${{ github.workspace }}/src/build
@@ -53,7 +56,8 @@ jobs:
     - name: Tar build
       working-directory: ${{ github.workspace }}/src/build
       run:  |
-        tar -cvf geometryViewer-${{ matrix.os }}.tar GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView* 
+        mv PenRed/src/bindings/C/viewers/geometry/libgeoView* .
+        tar -cvf geometryViewer-${{ matrix.os }}.tar GeometryViewer libgeoView* 
         
     - name: Save build artifact on linux
       uses: actions/upload-artifact@master
@@ -78,7 +82,10 @@ jobs:
         host:         windows
         target:       desktop
         dir:          ${{ runner.temp }}
-        setup-python: false
+        setup-python: 'true'
+        install-deps: 'true'
+        cache: 'false'
+        set-env: 'true'
               
     - name: Create building folder
       run: |
