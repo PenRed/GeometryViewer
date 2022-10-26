@@ -46,7 +46,8 @@ jobs:
       run: |
         git clone https://github.com/PenRed/PenRed
         mkdir ${{ github.workspace }}/src/build/PenRed/src/build
-        cmake -DBUILD_VIEW_SHARED_LIB="OFF" ../
+        cd ${{ github.workspace }}/src/build/PenRed/src/build
+        cmake -DBUILD_C_BINDS=ON -DWITH_NATIVE=ON -DWITH_DICOM=OFF -DWITH_MULTI_THREADING=ON -DWITH_MPI=OFF -DWITH_LB=OFF -DDEVELOPMENT_WARNINGS=OFF ../
         cmake --build . --target install
       working-directory: ${{ github.workspace }}/src/build
 
