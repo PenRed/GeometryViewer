@@ -4,6 +4,8 @@
 #include <cmath>
 #include <thread>
 #include <algorithm>
+#include <vector>
+#include <array>
 #include <QWidget>
 #include <QLabel>
 #include <QLayout>

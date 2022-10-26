@@ -32,6 +32,7 @@
 #ifndef __PEN_GEO_VIEWER__
 
 #include <cstdio>
+#include <array>
 #include <vector>
 
 struct geoError{
