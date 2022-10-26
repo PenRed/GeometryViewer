@@ -53,25 +53,28 @@ jobs:
         cmake --build . --target install
       working-directory: ${{ github.workspace }}/src/build
 
-    - name: Tar build
+    - name: Move the library
       working-directory: ${{ github.workspace }}/src/build
       run:  |
         mv PenRed/src/bindings/C/viewers/geometry/libgeoView* .
-        tar -cvf geometryViewer-${{ matrix.os }}.tar GeometryViewer libgeoView* 
         
-    - name: Save build artifact on linux
+    - name: Save build artifact
       uses: actions/upload-artifact@master
       with:
-        name: geometryViewer-${{ matrix.os }}.tar
-        path: ${{ github.workspace }}/src/build/geometryViewer-${{ matrix.os }}.tar
+        name: geometryViewer-${{ matrix.os }}
+        path: | 
+          ${{ github.workspace }}/src/build/GeometryViewer
+          ${{ github.workspace }}/src/build/libgeoView*
 
   buildWindows:
 
     name: Build on Windows
-    runs-on: windows-latest
-    strategy:
+    runs-on: ${{ matrix.os }}
+    strategy: 
       fail-fast: false
-            
+      matrix:
+        os: [windows-2019, windows-2022]
+
     steps:
     - uses: actions/checkout@v2
 
@@ -105,15 +108,17 @@ jobs:
         cmake --build . --target install
       working-directory: ${{ github.workspace }}/src/build
 
-    - name: Zip build on windows
+    - name: Move the library
       working-directory: ${{ github.workspace }}/src/build
       run:  |
-        7z a geometryViewer-windows.zip GeometryViewer PenRed/src/bindings/C/viewers/geometry/libgeoView*
-
-    - name: Save build artifact on windows
+        mv PenRed/src/bindings/C/viewers/geometry/libgeoView* .
+        
+    - name: Save build artifact
       uses: actions/upload-artifact@master
       with:
-        name: geometryViewer-windows.zip
-        path: ${{ github.workspace }}/src/build
+        name: geometryViewer-${{ matrix.os }}
+        path: | 
+          ${{ github.workspace }}/src/build/GeometryViewer
+          ${{ github.workspace }}/src/build/libgeoView*
 
       
