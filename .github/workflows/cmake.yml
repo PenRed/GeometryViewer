@@ -118,7 +118,7 @@ jobs:
       with:
         name: geometryViewer-${{ matrix.os }}
         path: | 
-          ${{ github.workspace }}/src/build/GeometryViewer
-          ${{ github.workspace }}/src/build/libgeoView*
+          ${{ github.workspace }}\src\build\GeometryViewer
+          ${{ github.workspace }}\src\build\libgeoView*
 
       
