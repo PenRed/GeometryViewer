@@ -5,6 +5,7 @@
 #include <QTextEdit>
 #include <QMimeData>
 #include <QDropEvent>
+#include <QFile>
 
 class textConfig : public QTextEdit
 {
