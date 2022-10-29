@@ -1,6 +1,6 @@
 
-QT5DIR=$1
-QT5PLUGINPATH=${QT5DIR}/plugins
+QTDIR=$1
+QTPLUGINPATH=${QTDIR}/plugins
 
 rm -r lib &> /dev/null
 rm -r platforms &> /dev/null
@@ -12,13 +12,13 @@ mkdir plugins
 
 #ldd GeometryViewer | grep "Qt" | cut -d'>' -f2 | cut -d' ' -f2 | xargs -I % cp % lib/
 ldd GeometryViewer | cut -d'>' -f2 | cut -d' ' -f2 | grep "/" | xargs -I % cp % lib/
-find ${QT5DIR}/lib -name libQt*XcbQ* | xargs -I % cp % lib/
-find ${QT5DIR}/lib -name "*Wayland*" | grep ".so"
-cp ${QT5PLUGINPATH}/platforms/*xcb* platforms/
-cp ${QT5PLUGINPATH}/platforms/*wayland* platforms/
-cp -r ${QT5PLUGINPATH}/wayland* plugins/
-cp -r ${QT5PLUGINPATH}/xcb* plugins/
-cp -r ${QT5PLUGINPATH}/platformthemes plugins/
-cp -r ${QT5PLUGINPATH}/platforminputcontexts plugins/
+find ${QTDIR}/lib -name libQt*XcbQ* | xargs -I % cp % lib/
+find ${QTDIR}/lib -name "*Wayland*" | grep ".so"
+cp ${QTPLUGINPATH}/platforms/*xcb* platforms/
+cp ${QTPLUGINPATH}/platforms/*wayland* platforms/
+cp -r ${QTPLUGINPATH}/wayland* plugins/
+cp -r ${QTPLUGINPATH}/xcb* plugins/
+cp -r ${QTPLUGINPATH}/platformthemes plugins/
+cp -r ${QTPLUGINPATH}/platforminputcontexts plugins/
 
 tar -cvf GeometryViewer.tar.gz GeometryViewer lib* platforms plugins
