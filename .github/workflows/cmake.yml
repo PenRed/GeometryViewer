@@ -45,20 +45,10 @@ jobs:
         cmake --build . --config Release
       working-directory: ${{ github.workspace }}/src/build
       
-    - name: Save dependencies
+    - name: Bundle dependencies
       run: |
-        mkdir ${{ github.workspace }}/src/build/lib
-        mkdir ${{ github.workspace }}/src/build/platforms
-        mkdir ${{ github.workspace }}/src/build/plugins
-        #ldd GeometryViewer | grep "Qt" | cut -d'>' -f2 | cut -d' ' -f2 | xargs -I % cp % lib/
-        ldd GeometryViewer | cut -d'>' -f2 | cut -d' ' -f2 | grep "/" | xargs -I % cp % lib/
-        find ${{ env.Qt5_DIR }}/lib -name libQt*XcbQ* | xargs -I % cp % lib/
-        cp ${{ env.QT_PLUGIN_PATH }}/platforms/*xcb* platforms/
-        cp ${{ env.QT_PLUGIN_PATH }}/platforms/*wayland* platforms/
-        cp -r ${{ env.QT_PLUGIN_PATH }}/wayland* plugins/
-        cp -r ${{ env.QT_PLUGIN_PATH }}/xcb* plugins/
-        cp -r ${{ env.QT_PLUGIN_PATH }}/platformthemes plugins/
-        cp -r ${{ env.QT_PLUGIN_PATH }}/platforminputcontexts plugins/
+        cp ${{ github.workspace }}/bundle.sh bundle.sh
+        bash bundle.sh ${{ env.Qt5_DIR }}
       working-directory: ${{ github.workspace }}/src/build
       
     - name: Build the PenRed shared lib
