@@ -21,7 +21,7 @@ jobs:
         os: [ubuntu-22.04, ubuntu-20.04]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
@@ -48,7 +48,7 @@ jobs:
     - name: Bundle dependencies
       run: |
         cp ${{ github.workspace }}/bundle.sh bundle.sh
-        bash bundle.sh ${{ env.Qt5_DIR }}
+        bash bundle.sh ${{ env.Qt6_DIR }}
       working-directory: ${{ github.workspace }}/src/build
       
     - name: Build the PenRed shared lib
@@ -86,7 +86,7 @@ jobs:
         os: [windows-2019, windows-2022]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
