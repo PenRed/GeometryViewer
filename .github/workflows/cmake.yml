@@ -2,9 +2,9 @@ name: CMake
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 env:
@@ -71,6 +71,7 @@ jobs:
         name: geometryViewer-${{ matrix.os }}
         path: | 
           ${{ github.workspace }}/src/build/GeometryViewer
+          ${{ github.workspace }}/GeometryViewer.sh
           ${{ github.workspace }}/src/build/libgeoView*
           ${{ github.workspace }}/src/build/lib
           ${{ github.workspace }}/src/build/platforms
