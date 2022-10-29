@@ -38,12 +38,21 @@ jobs:
     - name: Create building folder
       run: |
         mkdir ${{ github.workspace }}/src/build
+    
     - name: Build the geometry viewer
       run: |
         cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
         cmake --build . --config Release
       working-directory: ${{ github.workspace }}/src/build
-
+      
+    - name: Save QT libs
+      run: |
+        mkdir ${{ github.workspace }}/src/build/lib
+        mkdir ${{ github.workspace }}/src/build/lib/platforms
+        ldd GeometryViewer | grep "Qt" | cut -d'>' -f2 | cut -d' ' -f2 | xargs -I % cp % lib/
+        ldd GeometryViewer | grep "xcb" | cut -d'>' -f2 | cut -d' ' -f2 | xargs -I % cp % lib/platforms/
+      working-directory: ${{ github.workspace }}/src/build
+      
     - name: Build the PenRed shared lib
       run: |
         git clone https://github.com/PenRed/PenRed
@@ -65,6 +74,8 @@ jobs:
         path: | 
           ${{ github.workspace }}/src/build/GeometryViewer
           ${{ github.workspace }}/src/build/libgeoView*
+          ${{ github.workspace }}/src/build/lib
+          ${{ github.workspace }}/src/build/platform
 
   buildWindows:
 
