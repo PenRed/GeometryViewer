@@ -76,6 +76,7 @@ jobs:
           ${{ github.workspace }}/src/build/GeometryViewer
           ${{ github.workspace }}/src/build/libgeoView*
           ${{ github.workspace }}/src/build/lib
+          ${{ github.workspace }}/src/build/platforms
 
   buildWindows:
 
