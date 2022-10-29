@@ -13,7 +13,9 @@ mkdir plugins
 #ldd GeometryViewer | grep "Qt" | cut -d'>' -f2 | cut -d' ' -f2 | xargs -I % cp % lib/
 ldd GeometryViewer | cut -d'>' -f2 | cut -d' ' -f2 | grep "/" | xargs -I % cp % lib/
 find ${QTDIR}/lib -name libQt*XcbQ* | xargs -I % cp % lib/
-find ${QTDIR}/lib -name "*Wayland*" | grep ".so"
+find ${QTDIR}/lib -name "*Wayland*" | grep ".so" | xargs -I % cp % lib/
+find ${QTDIR}/lib -name "*OpenGL*" | grep ".so" | xargs -I % cp % lib/
+
 cp ${QTPLUGINPATH}/platforms/*xcb* platforms/
 cp ${QTPLUGINPATH}/platforms/*wayland* platforms/
 cp -r ${QTPLUGINPATH}/wayland* plugins/
