@@ -50,7 +50,7 @@ jobs:
         mkdir ${{ github.workspace }}/src/build/lib
         mkdir ${{ github.workspace }}/src/build/platforms
         #ldd GeometryViewer | grep "Qt" | cut -d'>' -f2 | cut -d' ' -f2 | xargs -I % cp % lib/
-        ldd GeometryViewer | cut -d'>' -f2 | cut -d' ' -f2 | xargs -I % cp % lib/
+        ldd GeometryViewer | cut -d'>' -f2 | cut -d' ' -f2 | grep "/" | xargs -I % cp % lib/
         cp ${{ env.QT_PLUGIN_PATH }}/platforms/*xcb* platforms/
         cp ${{ env.QT_PLUGIN_PATH }}/platforms/*wayland* platforms/
       working-directory: ${{ github.workspace }}/src/build
