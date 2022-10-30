@@ -1,3 +1,4 @@
+#include <clocale>
 #include "mainwindow.h"
 
 #include <QApplication>

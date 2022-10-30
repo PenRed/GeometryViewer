@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <cstdio>
+#include <vector>
+#include <array>
+#include <stdexcept>
 #include <QMainWindow>
 #include <QLibrary>
 #include <QElapsedTimer>
