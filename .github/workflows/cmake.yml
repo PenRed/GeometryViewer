@@ -63,6 +63,7 @@ jobs:
     - name: Move the library
       working-directory: ${{ github.workspace }}/src/build
       run:  |
+        mv ${{ github.workspace }}/GeometryViewer.sh GeometryViewer.sh
         mv PenRed/src/bindings/C/viewers/geometry/libgeoView* .
         
     - name: Save build artifact
@@ -71,7 +72,7 @@ jobs:
         name: geometryViewer-${{ matrix.os }}
         path: | 
           ${{ github.workspace }}/src/build/GeometryViewer
-          ${{ github.workspace }}/GeometryViewer.sh
+          ${{ github.workspace }}/src/build/GeometryViewer.sh
           ${{ github.workspace }}/src/build/libgeoView*
           ${{ github.workspace }}/src/build/lib
           ${{ github.workspace }}/src/build/platforms
