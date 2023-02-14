@@ -121,7 +121,7 @@ jobs:
         cmake --build . --config Release
         ls
         mkdir Release
-        cp GeometryViewer.app Release/
+        cp -r GeometryViewer.app Release/
         cd Release
         macdeployqt GeometryViewer.app --dmg --release
       working-directory: ${{ github.workspace }}/src/build
