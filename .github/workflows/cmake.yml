@@ -144,7 +144,7 @@ jobs:
       with:
         name: geometryViewer-${{ matrix.os }}
         path: | 
-          ${{ github.workspace }}\src\build\Release
+          ${{ github.workspace }}/src/build/Release
 
   buildWindows:
 
