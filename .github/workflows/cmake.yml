@@ -13,21 +13,17 @@ env:
 jobs:
 
   buildLinux:
-    name: Build on Unix
+    name: Build on Linux
     runs-on: ${{ matrix.os }}
     strategy: 
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04, macos-12, macos-11]
+        os: [ubuntu-22.04, ubuntu-20.04]
         include:
           - os: ubuntu-22.04
             release_suffix: ubuntu-22.04
           - os: ubuntu-20.04
             release_suffix: ubuntu-20.04
-          - os: macos-12
-            release_suffix: macOS Monterey 12
-          - os: macos-11
-            release_suffix: macOS Big Sur 11
             
     steps:
     - uses: actions/checkout@v3
@@ -50,8 +46,79 @@ jobs:
     
     - name: Build the geometry viewer
       run: |
-        qt-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
-        qt-cmake --build . --config Release
+        cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
+        cmake --build . --config Release
+      working-directory: ${{ github.workspace }}/src/build
+      
+    - name: Bundle dependencies
+      run: |
+        cp ${{ github.workspace }}/bundle.sh bundle.sh
+        bash bundle.sh ${{ env.Qt6_DIR }}
+      working-directory: ${{ github.workspace }}/src/build
+      
+    - name: Build the PenRed shared lib
+      run: |
+        git clone https://github.com/PenRed/PenRed
+        mkdir ${{ github.workspace }}/src/build/PenRed/src/build
+        cd ${{ github.workspace }}/src/build/PenRed/src/build
+        cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_C_BINDS=ON -DWITH_NATIVE=OFF -DWITH_DICOM=OFF -DWITH_MULTI_THREADING=ON -DWITH_MPI=OFF -DWITH_LB=OFF -DDEVELOPMENT_WARNINGS=OFF ../
+        cmake --build . --target install --config Release
+      working-directory: ${{ github.workspace }}/src/build
+
+    - name: Move the library
+      working-directory: ${{ github.workspace }}/src/build
+      run:  |
+        mv ${{ github.workspace }}/GeometryViewer.sh GeometryViewer.sh
+        mv PenRed/src/bindings/C/viewers/geometry/libgeoView* .
+        
+    - name: Save build artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: geometryViewer-${{ matrix.os }}
+        path: | 
+          ${{ github.workspace }}/src/build/GeometryViewer
+          ${{ github.workspace }}/src/build/GeometryViewer.sh
+          ${{ github.workspace }}/src/build/libgeoView*
+          ${{ github.workspace }}/src/build/lib
+          ${{ github.workspace }}/src/build/platforms
+          ${{ github.workspace }}/src/build/plugins
+
+  buildMacOS:
+    name: Build on MacOS
+    runs-on: ${{ matrix.os }}
+    strategy: 
+      fail-fast: false
+      matrix:
+        os: [macos-12, macos-11]
+        include:
+          - os: macos-12
+            release_suffix: macOS Monterey 12
+          - os: macos-11
+            release_suffix: macOS Big Sur 11
+            
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version:      ${{ env.QT_VERSION }}
+        host:         mac
+        target:       desktop
+        dir:          ${{ runner.temp }}
+        setup-python: 'true'
+        install-deps: 'true'
+        cache: 'false'
+        set-env: 'true'
+
+    - name: Create building folder
+      run: |
+        mkdir ${{ github.workspace }}/src/build
+    
+    - name: Build the geometry viewer
+      run: |
+        cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
+        cmake --build . --config Release
       working-directory: ${{ github.workspace }}/src/build
       
     - name: Bundle dependencies
