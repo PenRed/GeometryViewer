@@ -50,8 +50,8 @@ jobs:
     
     - name: Build the geometry viewer
       run: |
-        cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
-        cmake --build . --config Release
+        qt-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
+        qt-cmake --build . --config Release
       working-directory: ${{ github.workspace }}/src/build
       
     - name: Bundle dependencies
