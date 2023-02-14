@@ -119,12 +119,8 @@ jobs:
       run: |
         cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
         cmake --build . --config Release
-      working-directory: ${{ github.workspace }}/src/build
-      
-    - name: Bundle dependencies
-      run: |
-        cp ${{ github.workspace }}/bundle.sh bundle.sh
-        bash bundle.sh ${{ env.Qt6_DIR }}
+        cd Release
+        macdeployqt GeometryViewer.app --dmg --release
       working-directory: ${{ github.workspace }}/src/build
       
     - name: Build the PenRed shared lib
@@ -139,20 +135,14 @@ jobs:
     - name: Move the library
       working-directory: ${{ github.workspace }}/src/build
       run:  |
-        mv ${{ github.workspace }}/GeometryViewer.sh GeometryViewer.sh
-        mv PenRed/src/bindings/C/viewers/geometry/libgeoView* .
-        
+        mv PenRed/src/bindings/C/viewers/geometry/*geoView* Release/libgeoView_C.so
+          
     - name: Save build artifact
       uses: actions/upload-artifact@master
       with:
         name: geometryViewer-${{ matrix.os }}
         path: | 
-          ${{ github.workspace }}/src/build/GeometryViewer
-          ${{ github.workspace }}/src/build/GeometryViewer.sh
-          ${{ github.workspace }}/src/build/libgeoView*
-          ${{ github.workspace }}/src/build/lib
-          ${{ github.workspace }}/src/build/platforms
-          ${{ github.workspace }}/src/build/plugins
+          ${{ github.workspace }}\src\build\Release
 
   buildWindows:
 
