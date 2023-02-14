@@ -13,13 +13,22 @@ env:
 jobs:
 
   buildLinux:
-    name: Build on Linux
+    name: Build on Unix
     runs-on: ${{ matrix.os }}
     strategy: 
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04]
-
+        os: [ubuntu-22.04, ubuntu-20.04, macos-12, macos-11]
+        include:
+          - os: ubuntu-22.04
+            release_suffix: ubuntu-22.04
+          - os: ubuntu-20.04
+            release_suffix: ubuntu-20.04
+          - os: macos-12
+            release_suffix: macOS Monterey 12
+          - os: macos-11
+            release_suffix: macOS Big Sur 11
+            
     steps:
     - uses: actions/checkout@v3
 
