@@ -123,7 +123,7 @@ jobs:
         mkdir Release
         cp -r GeometryViewer.app Release/
         cd Release
-        macdeployqt GeometryViewer.app -dmg --release
+        macdeployqt GeometryViewer.app -dmg
       working-directory: ${{ github.workspace }}/src/build
       
     - name: Build the PenRed shared lib
