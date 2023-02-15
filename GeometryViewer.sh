@@ -12,4 +12,5 @@ export LD_LIBRARY_PATH
 
 echo "Path lib: ${LD_LIBRARY_PATH}"
 
+chmod +x $appname
 $dirname/$appname "$@"
