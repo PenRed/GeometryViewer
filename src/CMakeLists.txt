@@ -25,6 +25,12 @@ if(BUILD_VIEW_SHARED_LIB)
     )
 endif(BUILD_VIEW_SHARED_LIB)
 
+if (MSVC) 
+  # We need a stack size of 8MB (as it is default on linux)
+  # See https://github.com/open62541/open62541/issues/1326
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /STACK:8388608")
+endif(MSVC)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
