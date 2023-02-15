@@ -29,7 +29,24 @@ MainWindow::MainWindow(QWidget *parent)
     saveDialog.setSidebarUrls(urls);
     saveDialog.setFileMode(QFileDialog::AnyFile);
     saveDialog.setAcceptMode(QFileDialog::AcceptSave);
-    connect(&saveDialog, &QFileDialog::urlSelected, this, &MainWindow::on_saveImage);
+    connect(&saveDialog, &QFileDialog::fileSelected, this, &MainWindow::on_saveImage);
+
+    //Configure load dialogs
+
+    loadConfigDialog.setSidebarUrls(urls);
+    loadConfigDialog.setFileMode(QFileDialog::ExistingFile);
+    loadConfigDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    connect(&loadConfigDialog, &QFileDialog::fileSelected, this, &MainWindow::on_loadConfig);
+
+    loadQuadricDialog.setSidebarUrls(urls);
+    loadQuadricDialog.setFileMode(QFileDialog::ExistingFile);
+    loadQuadricDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    connect(&loadQuadricDialog, &QFileDialog::fileSelected, this, &MainWindow::on_loadQuadric);
+
+    loadMeshDialog.setSidebarUrls(urls);
+    loadMeshDialog.setFileMode(QFileDialog::ExistingFile);
+    loadMeshDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    connect(&loadMeshDialog, &QFileDialog::fileSelected, this, &MainWindow::on_loadMesh);
 
     //Initialize buffers
     for(auto& buffer : buffers)
@@ -97,14 +114,75 @@ MainWindow::~MainWindow()
         destroyViewer(penRedViewer);
 }
 
-void MainWindow::on_saveImage(const QUrl& url){
+void MainWindow::on_saveImage(const QString &file){
 
     if(viewersArray[activeViewer] != nullptr){
-        printf("Saving to: %s\n", url.toLocalFile().toStdString().c_str());
+        printf("Saving to: %s\n", file.toStdString().c_str());
         fflush(stdout);
-        viewersArray[activeViewer]->readImage().save(url.toLocalFile(),"PNG");
+        viewersArray[activeViewer]->readImage().save(file,"PNG");
     }
 
+}
+
+void MainWindow::on_loadConfig(const QString &file){
+    printf("Loading geometry from configuration '%s'", file.toStdString().c_str());
+
+    //Initialize the viewer
+    int err = penRedViewer->init(file.toStdString().c_str());
+    if(err != 0){
+        printf("Error loading the geometry\n");
+        fflush(stdout);
+        return;
+    }
+
+    //Emit load signal
+    emit geometryLoad();
+}
+
+void MainWindow::on_loadQuadric(const QString &file){
+    printf("Loading quadric geometry from file '%s'", file.toStdString().c_str());
+
+    //Write a default configuration file
+    FILE* fout = nullptr;
+    fout = fopen("quadConf.txt","w");
+    fprintf(fout,"type \"PEN_QUADRIC\"\n");
+    fprintf(fout,"input-file \"%s\"\n", file.toStdString().c_str());
+    fprintf(fout,"processed-geo-file \"report.geo\"\n");
+    fclose(fout);
+
+    //Initialize the viewer
+    int err = penRedViewer->init("quadConf.txt");
+    if(err != 0){
+        printf("Error loading the geometry\n");
+        fflush(stdout);
+        return;
+    }
+
+    //Emit load signal
+    emit geometryLoad();
+}
+
+void MainWindow::on_loadMesh(const QString &file){
+    printf("Loading triangular mesh geometry from file '%s'", file.toStdString().c_str());
+
+    //Write a default configuration file
+    FILE* fout = nullptr;
+    fout = fopen("triMeshConf.txt","w");
+    fprintf(fout,"type \"MESH_BODY\"\n");
+    fprintf(fout,"input-file \"%s\"\n", file.toStdString().c_str());
+    //fprintf(fout,"report-file \"report.geo\"\n");
+    fclose(fout);
+
+    //Initialize the viewer
+    int err = penRedViewer->init("triMeshConf.txt");
+    if(err != 0){
+        printf("Error loading the geometry\n");
+        fflush(stdout);
+        return;
+    }
+
+    //Emit load signal
+    emit geometryLoad();
 }
 
 void MainWindow::setActiveViewer(unsigned index){
@@ -186,36 +264,6 @@ void MainWindow::createViewer(const size_t index){
     }
 }
 
-
-void MainWindow::on_createViewerButton_released()
-{
-    //Show next hided viewer
-    if(nViewers < maxViewers){
-
-        //Find first hide viewer
-        for(size_t i = 0; i < maxViewers; ++i){
-            if(!viewersArray[i]->isVisible()){
-                //Show it
-                viewersArray[i]->show();
-                //Try to copy from selected viewer
-                if(viewersArray[activeViewer] != nullptr){
-                    viewersArray[i]->copy(*(viewersArray[activeViewer]));
-                }
-                break;
-            }
-        }
-
-        //Increase number of active viewers
-        nViewers++;
-
-        if(nViewers >= maxViewers){
-            //Hide create button
-            ui->createViewerButton->hide();
-        }
-    }
-}
-
-
 void MainWindow::on_Xedit_editingFinished()
 {
     double value = ui->Xedit->text().toDouble();
@@ -248,27 +296,6 @@ void MainWindow::on_Zedit_editingFinished()
     }
 }
 
-
-void MainWindow::on_loadButton_released()
-{
-    //Write the text to a file
-    FILE* fout = nullptr;
-    fout = fopen("geometry.txt","w");
-    fprintf(fout,"%s",ui->configText->toPlainText().toStdString().c_str());
-    fclose(fout);
-
-    //Initialize the viewer
-    int err = penRedViewer->init("geometry.txt");
-    if(err != 0){
-        printf("Error loading the geometry\n");
-        fflush(stdout);
-        return;
-    }
-
-    //Emit load signal
-    emit geometryLoad();
-}
-
 void MainWindow::on_matBodyViewButton_released()
 {
     if(viewersArray[activeViewer] != nullptr){
@@ -291,26 +318,6 @@ void MainWindow::on_perspectiveSelector_currentIndexChanged(int index)
             viewersArray[activeViewer]->setPerspective(index);
             updateKey();
         }
-    }
-}
-
-
-void MainWindow::on_deleteButton_released()
-{
-    if(nViewers > 1){
-
-        //Hide viewer
-        viewersArray[activeViewer]->hide();
-        //Reset active viewer to first non hide viewer
-        for(size_t i = 0; i < maxViewers; ++i)
-            if(viewersArray[i]->isVisible())
-                setActiveViewer(i);
-
-        //Show create viewer button
-        ui->createViewerButton->show();
-
-        //Decrease number of viewers
-        --nViewers;
     }
 }
 
@@ -468,13 +475,6 @@ void MainWindow::on_resolutionV3D_valueChanged(int arg1)
     update3Dresolution();
 }
 
-
-void MainWindow::on_saveButton_released()
-{
-    saveDialog.exec();
-}
-
-
 void MainWindow::on_rhoEdit_editingFinished()
 {
     double value = ui->rhoEdit->text().toDouble();
@@ -509,5 +509,76 @@ void MainWindow::on_phiEdit_editingFinished()
         viewersArray[activeViewer]->setPhi(value);
         updateKey();
     }
+}
+
+
+void MainWindow::on_actionconfig_triggered()
+{
+    loadConfigDialog.exec();
+}
+
+
+void MainWindow::on_actionQadric_triggered()
+{
+    loadQuadricDialog.exec();
+}
+
+
+void MainWindow::on_actionMesh_triggered()
+{
+    loadMeshDialog.exec();
+}
+
+
+void MainWindow::on_actionSave_triggered()
+{
+    saveDialog.exec();
+}
+
+
+void MainWindow::on_actionAdd_triggered()
+{
+    //Show next hided viewer
+    if(nViewers < maxViewers){
+
+        //Find first hide viewer
+        for(size_t i = 0; i < maxViewers; ++i){
+            if(!viewersArray[i]->isVisible()){
+                //Show it
+                viewersArray[i]->show();
+                //Try to copy from selected viewer
+                if(viewersArray[activeViewer] != nullptr){
+                    viewersArray[i]->copy(*(viewersArray[activeViewer]));
+                }
+                break;
+            }
+        }
+
+        //Increase number of active viewers
+        nViewers++;
+    }
+}
+
+
+void MainWindow::on_actionDelete_triggered()
+{
+    if(nViewers > 1){
+
+        //Hide viewer
+        viewersArray[activeViewer]->hide();
+        //Reset active viewer to first non hide viewer
+        for(size_t i = 0; i < maxViewers; ++i)
+            if(viewersArray[i]->isVisible())
+                setActiveViewer(i);
+
+        //Decrease number of viewers
+        --nViewers;
+    }
+}
+
+
+void MainWindow::on_actionExit_triggered()
+{
+    QApplication::quit();
 }
 
