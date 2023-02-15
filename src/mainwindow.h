@@ -10,6 +10,8 @@
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <QStandardPaths>
+#include <QMenuBar>
+#include <QMenu>
 #include "viewer.h"
 #include "pen_geoViewInterface.hh"
 
@@ -35,13 +37,17 @@ private slots:
 
     void on_viewerChanged(viewer*);
 
-    void on_saveImage(const QUrl& url);
+    void on_saveImage(const QString &file);
+
+    void on_loadConfig(const QString &file);
+
+    void on_loadQuadric(const QString &file);
+
+    void on_loadMesh(const QString &file);
 
     void on_zoomIn3D();
 
     void on_zoomOut3D();
-
-    void on_createViewerButton_released();
 
     void on_Xedit_editingFinished();
 
@@ -49,13 +55,9 @@ private slots:
 
     void on_Zedit_editingFinished();
 
-    void on_loadButton_released();
-
     void on_matBodyViewButton_released();
 
     void on_perspectiveSelector_currentIndexChanged(int index);
-
-    void on_deleteButton_released();
 
     void on_resolutionEditY_valueChanged(int arg1);
 
@@ -77,13 +79,25 @@ private slots:
 
     void on_resolutionV3D_valueChanged(int arg1);
 
-    void on_saveButton_released();
-
     void on_rhoEdit_editingFinished();
 
     void on_thetaEdit_editingFinished();
 
     void on_phiEdit_editingFinished();
+
+    void on_actionconfig_triggered();
+
+    void on_actionQadric_triggered();
+
+    void on_actionMesh_triggered();
+
+    void on_actionSave_triggered();
+
+    void on_actionAdd_triggered();
+
+    void on_actionDelete_triggered();
+
+    void on_actionExit_triggered();
 
 signals:
 
@@ -100,6 +114,9 @@ private:
     QLibrary viewerLib;
 
     QFileDialog saveDialog;
+    QFileDialog loadConfigDialog;
+    QFileDialog loadQuadricDialog;
+    QFileDialog loadMeshDialog;
 
     typedef pen_geoViewInterface* (*viewerConstructor)();
     viewerConstructor constructViewer;
