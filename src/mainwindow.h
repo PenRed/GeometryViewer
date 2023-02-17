@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <stdexcept>
+#include <algorithm>
 #include <QMainWindow>
 #include <QLibrary>
 #include <QElapsedTimer>
@@ -12,6 +13,8 @@
 #include <QStandardPaths>
 #include <QMenuBar>
 #include <QMenu>
+#include <QDialogButtonBox>
+#include <QColorDialog>
 #include "viewer.h"
 #include "pen_geoViewInterface.hh"
 
@@ -99,6 +102,8 @@ private slots:
 
     void on_actionExit_triggered();
 
+    void on_actionColors_triggered();
+
 signals:
 
     void geometryLoad();
@@ -118,6 +123,10 @@ private:
     QFileDialog loadQuadricDialog;
     QFileDialog loadMeshDialog;
 
+    QDialog* colorsDialog;
+    QVBoxLayout* colorListLayout;
+    QColorDialog* selectColorDialog;
+
     typedef pen_geoViewInterface* (*viewerConstructor)();
     viewerConstructor constructViewer;
     typedef void (*viewerDestructor)(pen_geoViewInterface*);
@@ -136,6 +145,21 @@ private:
     void updateKey();
     void createViewer(const size_t index);
     void update3Dresolution();
+    void changeViewerColors();
+
+    inline void resetViewerColors(){
+        viewer::resetColors();
+        saveViewerColors("colors.conf");
+        loadViewerColors("colors.conf");
+    }
+    inline void saveConfigColors(){
+        saveViewerColors("colors.conf");
+    }
+    inline void loadConfigColors(){
+        loadViewerColors("colors.conf");
+    }
+    void loadViewerColors(const QString &file);
+    void saveViewerColors(const QString &file);
 
 };
 #endif // MAINWINDOW_H

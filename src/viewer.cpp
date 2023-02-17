@@ -1,5 +1,7 @@
 #include "viewer.h"
 
+std::array<unsigned char, viewer::nColorsPos> viewer::colors;
+
 viewer::viewer(std::vector<uchar>& bufferIn,
                std::vector<unsigned char>& matImageIn,
                std::vector<unsigned int>& bodyImageIn,
@@ -52,6 +54,114 @@ viewer::viewer(std::vector<uchar>& bufferIn,
 
     //Set the pixmap in the label scaling int
     resizeImage();
+}
+
+std::array<unsigned char, viewer::nColorsPos> viewer::defaultColors(){
+
+    const unsigned int maxIntensity = 250;
+    const unsigned int baseIncrementPerRow = 100;
+    const unsigned int baseSteps = 2;
+    const unsigned int stepIncrement = baseIncrementPerRow/baseSteps;
+    const unsigned int colorsPerRow = 7*baseSteps;
+    const unsigned int nRows = 1 + nColors / colorsPerRow;
+
+    std::array<unsigned char, nColorsPos> a{};
+
+    size_t icolor = 0;
+    for(size_t irow = 0; irow < nRows ; ++irow){
+        //Init RGB
+        unsigned int R = baseIncrementPerRow*irow;
+        unsigned int G = baseIncrementPerRow*irow;
+        unsigned int B = baseIncrementPerRow*irow;
+
+        size_t colorIndex = 3*icolor++;
+        a[colorIndex  ] = R;
+        a[colorIndex+1] = G;
+        a[colorIndex+2] = B;
+
+        //R increase
+        for(size_t istep = 0; istep < baseSteps; ++istep){
+            R += stepIncrement;
+            colorIndex = 3*icolor++;
+            if(icolor < nColors){
+                a[colorIndex  ] = R;
+                a[colorIndex+1] = G;
+                a[colorIndex+2] = B;
+            }
+        }
+
+        //G increase
+        for(size_t istep = 0; istep < baseSteps; ++istep){
+            G += stepIncrement;
+            colorIndex = 3*icolor++;
+            if(icolor < nColors){
+                a[colorIndex  ] = R;
+                a[colorIndex+1] = G;
+                a[colorIndex+2] = B;
+            }
+        }
+
+        //R decrease
+        for(size_t istep = 0; istep < baseSteps; ++istep){
+            R -= stepIncrement;
+            colorIndex = 3*icolor++;
+            if(icolor < nColors){
+                a[colorIndex  ] = R;
+                a[colorIndex+1] = G;
+                a[colorIndex+2] = B;
+            }
+        }
+
+        //B increase
+        for(size_t istep = 0; istep < baseSteps; ++istep){
+            B += stepIncrement;
+            colorIndex = 3*icolor++;
+            if(icolor < nColors){
+                a[colorIndex  ] = R;
+                a[colorIndex+1] = G;
+                a[colorIndex+2] = B;
+            }
+        }
+
+        //G decrease
+        for(size_t istep = 0; istep < baseSteps; ++istep){
+            G -= stepIncrement;
+            colorIndex = 3*icolor++;
+            if(icolor < nColors){
+                a[colorIndex  ] = R;
+                a[colorIndex+1] = G;
+                a[colorIndex+2] = B;
+            }
+        }
+
+        //R increase
+        for(size_t istep = 0; istep < baseSteps; ++istep){
+            R += stepIncrement;
+            colorIndex = 3*icolor++;
+            if(icolor < nColors){
+                a[colorIndex  ] = R;
+                a[colorIndex+1] = G;
+                a[colorIndex+2] = B;
+            }
+        }
+
+        //B partial decrease
+        for(size_t istep = 0; istep < baseSteps-1; ++istep){
+            B -= stepIncrement;
+            colorIndex = 3*icolor++;
+            if(icolor < nColors){
+                a[colorIndex  ] = R;
+                a[colorIndex+1] = G;
+                a[colorIndex+2] = B;
+            }
+        }
+    }
+
+    return a;
+}
+
+void viewer::resetColors(){
+    viewer::colors = defaultColors();
 }
 
 void viewer::copy(const viewer& viewer2copy){
