@@ -9,6 +9,10 @@ MainWindow::MainWindow(QWidget *parent)
       destroyViewer(nullptr),
       width3D(400), height3D(400), pixelSize3D(0.1)
 {
+    //Init viewer colors
+    viewer::resetColors();
+
+    setWindowTitle("PenRed Geometry Viewer");
 
     ui->setupUi(this);
     nViewers = 0;
@@ -101,6 +105,238 @@ MainWindow::MainWindow(QWidget *parent)
     viewersArray[0]->show();
     nViewers = 1;
     setActiveViewer(0);    
+
+    // ** Color dialog
+
+    //Create the color dialog
+    colorsDialog = new QDialog;
+    colorsDialog->setWindowTitle("Colors");
+    //Create a global layout to add, in future versions, a palette load option
+    QVBoxLayout* mainColorLayout = new QVBoxLayout;
+
+    //Create a widget to store the color list in a scroll area
+    QWidget* colorListWidget = new QWidget;
+    //Set the layout for the color list
+    colorListLayout = new QVBoxLayout;
+    colorListWidget->setLayout(colorListLayout);
+    colorListLayout->setSpacing(0);
+    colorListLayout->setContentsMargins (0, 0, 0, 0);
+
+    //Put the color list inside a scroll area
+    QScrollArea* colorScrollArea = new QScrollArea;
+    colorScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    colorScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    colorScrollArea->setWidgetResizable(true);
+    colorScrollArea->setWidget(colorListWidget);
+
+    //Put the scroll area inside the main layout
+    mainColorLayout->addWidget(colorScrollArea);
+
+    //Create a pair button-frame for each element with color
+    //Each one will be added to the color list layout inside the scroll area.
+    for(size_t ic = 0; ic < viewer::nColors; ++ic){
+
+        //Button to change the color
+        char text[30];
+        sprintf(text,"Element %3lu", static_cast<unsigned long>(ic));
+
+        QPushButton* b = new QPushButton(text);
+        b->setProperty("colorNumber", static_cast<unsigned>(ic)); //Set color number as property
+        connect(b, &QAbstractButton::released, this, &MainWindow::changeViewerColors);
+
+        //Frame showing the actual color
+        QFrame* f = new QFrame;
+        f->setProperty("colorNumber", static_cast<unsigned>(ic)); //Set color number as property
+        f->setFrameStyle(QFrame::Box | QFrame::Raised);
+        f->setLineWidth(2);
+        char colorText[100];
+        sprintf(colorText, "background-color: rgb(%d,%d,%d)",
+                viewer::colors[3*ic],viewer::colors[3*ic+1],viewer::colors[3*ic+2]);
+        f->setStyleSheet(colorText);
+
+        //Create a parent widget
+        QWidget* elementWidget = new QWidget;
+        elementWidget->setStyleSheet("margin: 0");
+        elementWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::MinimumExpanding);
+
+        //Add both elements to a horizontal layout inside the parent widget
+        QHBoxLayout* elementLayout = new QHBoxLayout;
+        elementWidget->setLayout(elementLayout);
+        elementLayout->addWidget(b);
+        elementLayout->addWidget(f,1);
+
+        //Include it in the scroll area vertical layout
+        colorListLayout->addWidget(elementWidget);
+    }
+
+    //Include save, load and reset buttons for color selectino
+    QWidget* colorButtonsWidget = new QWidget;
+    QHBoxLayout* buttonsColorLayout = new QHBoxLayout;
+    colorButtonsWidget->setLayout(buttonsColorLayout);
+
+    //Create a save and load dialogs
+    QFileDialog* saveColorPaletteDialog = new QFileDialog;
+    saveColorPaletteDialog->setSidebarUrls(urls);
+    saveColorPaletteDialog->setFileMode(QFileDialog::AnyFile);
+    saveColorPaletteDialog->setAcceptMode(QFileDialog::AcceptSave);
+    connect(saveColorPaletteDialog, &QFileDialog::fileSelected, this, &MainWindow::saveViewerColors);
+
+    QFileDialog* loadColorPaletteDialog = new QFileDialog;
+    loadColorPaletteDialog->setSidebarUrls(urls);
+    loadColorPaletteDialog->setFileMode(QFileDialog::ExistingFile);
+    loadColorPaletteDialog->setAcceptMode(QFileDialog::AcceptOpen);
+    connect(loadColorPaletteDialog, &QFileDialog::fileSelected, this, &MainWindow::loadViewerColors);
+
+    QPushButton* saveColorsButton = new QPushButton("Export");
+    QPushButton* loadColorsButton = new QPushButton("Load");
+    QPushButton* resetColorsButton = new QPushButton("Reset");
+    connect(saveColorsButton, &QAbstractButton::released, saveColorPaletteDialog, &QFileDialog::exec);
+    connect(loadColorsButton, &QAbstractButton::released, loadColorPaletteDialog, &QFileDialog::exec);
+    connect(resetColorsButton, &QAbstractButton::released, this, &MainWindow::resetViewerColors);
+
+    //Include buttons in the layout
+    buttonsColorLayout->addWidget(saveColorsButton);
+    buttonsColorLayout->addWidget(loadColorsButton);
+    buttonsColorLayout->addWidget(resetColorsButton);
+
+    mainColorLayout->addWidget(colorButtonsWidget);
+
+    //Include the main layout in the color dialog
+    colorsDialog->setLayout(mainColorLayout->layout());
+    connect(colorsDialog, &QDialog::finished, this, &MainWindow::saveConfigColors);
+
+    //Create the color selection dialog
+    QColorDialog* selectColorDialog = new QColorDialog;
+
+    //Try to load the previous color configuration
+    loadConfigColors();
+
+}
+
+void MainWindow::loadViewerColors(const QString &file){
+
+    FILE* f = nullptr;
+    f = fopen(file.toStdString().c_str(), "r");
+    if(f == nullptr){
+        printf("Warning: Color palette file '%s' not found\n",file.toStdString().c_str());
+        return;
+    }
+
+    //Read all colors line by line
+    char line[400];
+    while(fgets(line,400,f) != nullptr){
+        // Try to read the next color
+        unsigned ic, r, g, b;
+        int nread = sscanf(line, " %u %u %u %u ",&ic,&r,&g,&b);
+        if(nread != 4){
+            //Corrupted line, skip it
+            printf("Warning: Invalid color line, skip: '%s'\n",line);
+        }else{
+            //Check if the color is in range
+            if(ic < viewer::nColors){
+                viewer::colors[3*ic  ] = static_cast<unsigned char>(std::clamp(r, 0u, 255u));
+                viewer::colors[3*ic+1] = static_cast<unsigned char>(std::clamp(g, 0u, 255u));
+                viewer::colors[3*ic+2] = static_cast<unsigned char>(std::clamp(b, 0u, 255u));
+
+                //Set frame color in the colors list layout
+                QLayoutItem* item = colorListLayout->itemAt(ic);
+                if(item != nullptr){
+                    //Get the widget
+                    QWidget* itemWidget = item->widget();
+                    if(itemWidget != nullptr){
+
+                        //Get the widget child frame
+                        QFrame* pframe = itemWidget->findChild<QFrame*>();
+                        if(pframe != nullptr){
+                            //Update frame color
+                            char colorText[100];
+                            sprintf(colorText, "background-color: rgb(%d,%d,%d)",
+                                    viewer::colors[3*ic],viewer::colors[3*ic+1],viewer::colors[3*ic+2]);
+                            pframe->setStyleSheet(colorText);
+                        }else{
+                            printf("Warning: Color frame %u not found",ic);
+                        }
+                    }
+                }
+            }else{
+                //Invalid color index, skip it
+                printf("Warning: Invalid color index, skip: '%s'\n",line);
+            }
+        }
+    }
+
+    //Force recalculate image colors
+    for(viewer* v : viewersArray){
+        if(v != nullptr)
+            v->setMatView(v->readMatView());
+    }
+    fclose(f);
+
+}
+
+void MainWindow::saveViewerColors(const QString &file){
+
+    FILE* f = nullptr;
+    f = fopen(file.toStdString().c_str(), "w");
+    if(f == nullptr){
+        printf("Warning: Unable to save color palette file '%s'\n",file.toStdString().c_str());
+        return;
+    }
+
+    //Write colors to file
+    for(size_t ic = 0; ic < viewer::nColors; ++ic){
+        fprintf(f,"%u %u %u %u\n",
+                static_cast<unsigned int>(ic),
+                static_cast<unsigned int>(viewer::colors[3*ic]),
+                static_cast<unsigned int>(viewer::colors[3*ic+1]),
+                static_cast<unsigned int>(viewer::colors[3*ic+2]));
+    }
+
+    fclose(f);
+
+}
+
+
+void MainWindow::changeViewerColors(){
+
+    //Get the released button
+    QObject* bPressed = QObject::sender();
+
+    //Get color to be changed
+    QVariant colorNumber = bPressed->property("colorNumber");
+    unsigned ic = colorNumber.toUInt();
+
+    //Save new color
+    QColor prevColor;
+    prevColor.setRed(viewer::colors[ic*3]);
+    prevColor.setGreen(viewer::colors[ic*3+1]);
+    prevColor.setBlue(viewer::colors[ic*3+2]);
+    QColor color = selectColorDialog->getColor(prevColor);
+    //Check if the color is valid, i.e. if the user pushes "ok" or "cancel"
+    if(!color.isValid())
+        return;
+
+    //Get the corresponding frame
+    QFrame* pframe = bPressed->parent()->findChild<QFrame*>();
+    if(pframe != nullptr){
+        //Update color
+        viewer::colors[3*ic  ] = color.red();
+        viewer::colors[3*ic+1] = color.green();
+        viewer::colors[3*ic+2] = color.blue();
+        //Update frame color
+        char colorText[100];
+        sprintf(colorText, "background-color: rgb(%d,%d,%d)",
+                viewer::colors[3*ic],viewer::colors[3*ic+1],viewer::colors[3*ic+2]);
+        pframe->setStyleSheet(colorText);
+
+        //Force recalculate image colors
+        for(viewer* v : viewersArray){
+            v->setMatView(v->readMatView());
+        }
+    }else{
+        printf("Warning: No frame found in 'changeColor release' signal");
+        return;
+    }
 }
 
 MainWindow::~MainWindow()
@@ -580,5 +816,11 @@ void MainWindow::on_actionDelete_triggered()
 void MainWindow::on_actionExit_triggered()
 {
     QApplication::quit();
+}
+
+
+void MainWindow::on_actionColors_triggered()
+{
+    colorsDialog->show();
 }
 
