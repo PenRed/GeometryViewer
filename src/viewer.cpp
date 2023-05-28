@@ -58,21 +58,26 @@ viewer::viewer(std::vector<uchar>& bufferIn,
 
 std::array<unsigned char, viewer::nColorsPos> viewer::defaultColors(){
 
-    const unsigned int maxIntensity = 250;
-    const unsigned int baseIncrementPerRow = 100;
+    const unsigned int baseIncrementPerRow = 300;
     const unsigned int baseSteps = 2;
     const unsigned int stepIncrement = baseIncrementPerRow/baseSteps;
     const unsigned int colorsPerRow = 7*baseSteps;
     const unsigned int nRows = 1 + nColors / colorsPerRow;
+    const unsigned int maxIntensity = baseIncrementPerRow*nRows + stepIncrement*baseSteps;
 
     std::array<unsigned char, nColorsPos> a{};
 
-    size_t icolor = 0;
+    //Define first color as black
+    a[0] = 0;
+    a[1] = 0;
+    a[2] = 0;
+    //Set color counter
+    size_t icolor = 1;
     for(size_t irow = 0; irow < nRows ; ++irow){
         //Init RGB
-        unsigned int R = baseIncrementPerRow*irow;
-        unsigned int G = baseIncrementPerRow*irow;
-        unsigned int B = baseIncrementPerRow*irow;
+        unsigned int R = maxIntensity - baseIncrementPerRow*irow;
+        unsigned int G = maxIntensity - baseIncrementPerRow*irow;
+        unsigned int B = maxIntensity - baseIncrementPerRow*irow;
 
         size_t colorIndex = 3*icolor++;
         a[colorIndex  ] = R;

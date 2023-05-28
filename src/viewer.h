@@ -23,7 +23,7 @@ class viewer : public QWidget
 
 public:
 
-    static const size_t nColors = 60;
+    static const size_t nColors = 200;
     static const size_t nColorsPos = nColors*3;
     static std::array<unsigned char, nColorsPos> colors;
 

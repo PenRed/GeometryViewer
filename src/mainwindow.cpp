@@ -363,11 +363,53 @@ void MainWindow::on_saveImage(const QString &file){
 void MainWindow::on_loadConfig(const QString &file){
     printf("Loading geometry from configuration '%s'", file.toStdString().c_str());
 
-    //Initialize the viewer
-    int err = penRedViewer->init(file.toStdString().c_str());
-    if(err != 0){
-        printf("Error loading the geometry\n");
-        fflush(stdout);
+    //Initialize the viewer in another thread
+    QFuture<int> future = QtConcurrent::run([this, file]{
+
+        int err = penRedViewer->init(file.toStdString().c_str());
+        if(err != 0){
+            printf("Error loading the geometry\n");
+            fflush(stdout);
+        }
+        return err;
+    });
+
+    QProgressBar* pbar = new QProgressBar;
+    pbar->setTextVisible(false);
+    pbar->setMaximum(100);
+    pbar->setMinimum(0);
+    QProgressDialog* progress = new QProgressDialog("Loading geometry", "Abort and exit", 0, 100);
+    progress->setBar(pbar);
+    progress->setWindowModality(Qt::WindowModal);
+
+    //Wait until thread finish
+    unsigned cont = 0;
+    for(;;){
+        progress->setValue((cont++)%100);
+        std::this_thread::sleep_for( std::chrono::milliseconds(100) );
+        if (progress->wasCanceled()){
+            delete progress;
+            exit(EXIT_SUCCESS);
+            return;
+        }
+
+        //Check if the future has been finished
+        if(future.isFinished()){
+            if(progress->close()){
+                delete progress;
+                break;
+            }
+        }
+    }
+
+    if(future.result() != 0){
+        QMessageBox* msgBox = new QMessageBox;
+        msgBox->setText("Unable to load geometry");
+        msgBox->setInformativeText("check logs for more information");
+        msgBox->setStandardButtons(QMessageBox::Ok);
+        msgBox->setDefaultButton(QMessageBox::Ok);
+        msgBox->setAttribute(Qt::WA_DeleteOnClose);
+        msgBox->exec();
         return;
     }
 
@@ -387,10 +429,51 @@ void MainWindow::on_loadQuadric(const QString &file){
     fclose(fout);
 
     //Initialize the viewer
-    int err = penRedViewer->init("quadConf.txt");
-    if(err != 0){
-        printf("Error loading the geometry\n");
-        fflush(stdout);
+    QFuture<int> future = QtConcurrent::run([this]{
+        int err = penRedViewer->init("quadConf.txt");
+        if(err != 0){
+            printf("Error loading the geometry\n");
+            fflush(stdout);
+        }
+        return err;
+    });
+
+    QProgressBar* pbar = new QProgressBar;
+    pbar->setTextVisible(false);
+    pbar->setMaximum(100);
+    pbar->setMinimum(0);
+    QProgressDialog* progress = new QProgressDialog("Loading quadric geometry", "Abort and exit", 0, 100);
+    progress->setBar(pbar);
+    progress->setWindowModality(Qt::WindowModal);
+
+    //Wait until thread finish
+    unsigned cont = 0;
+    for(;;){
+        progress->setValue((cont++)%100);
+        std::this_thread::sleep_for( std::chrono::milliseconds(100) );
+        if (progress->wasCanceled()){
+            delete progress;
+            exit(EXIT_SUCCESS);
+            return;
+        }
+
+        //Check if the future has been finished
+        if(future.isFinished()){
+            if(progress->close()){
+                delete progress;
+                break;
+            }
+        }
+    }
+
+    if(future.result() != 0){
+        QMessageBox* msgBox = new QMessageBox;
+        msgBox->setText("Unable to load quadric geometry");
+        msgBox->setInformativeText("check logs for more information");
+        msgBox->setStandardButtons(QMessageBox::Ok);
+        msgBox->setDefaultButton(QMessageBox::Ok);
+        msgBox->setAttribute(Qt::WA_DeleteOnClose);
+        msgBox->exec();
         return;
     }
 
@@ -410,10 +493,51 @@ void MainWindow::on_loadMesh(const QString &file){
     fclose(fout);
 
     //Initialize the viewer
-    int err = penRedViewer->init("triMeshConf.txt");
-    if(err != 0){
-        printf("Error loading the geometry\n");
-        fflush(stdout);
+    QFuture<int> future = QtConcurrent::run([this]{
+        int err = penRedViewer->init("triMeshConf.txt");
+        if(err != 0){
+            printf("Error loading the geometry\n");
+            fflush(stdout);
+        }
+        return err;
+    });
+
+    QProgressBar* pbar = new QProgressBar;
+    pbar->setTextVisible(false);
+    pbar->setMaximum(100);
+    pbar->setMinimum(0);
+    QProgressDialog* progress = new QProgressDialog("Loading mesh", "Abort and exit", 0, 100);
+    progress->setBar(pbar);
+    progress->setWindowModality(Qt::WindowModal);
+
+    //Wait until thread finish
+    unsigned cont = 0;
+    for(;;){
+        progress->setValue((cont++)%100);
+        std::this_thread::sleep_for( std::chrono::milliseconds(100) );
+        if (progress->wasCanceled()){
+            delete progress;
+            exit(EXIT_SUCCESS);
+            return;
+        }
+
+        //Check if the future has been finished
+        if(future.isFinished()){
+            if(progress->close()){
+                delete progress;
+                break;
+            }
+        }
+    }
+
+    if(future.result() != 0){
+        QMessageBox* msgBox = new QMessageBox;
+        msgBox->setText("Unable to load mesh");
+        msgBox->setInformativeText("check logs for more information");
+        msgBox->setStandardButtons(QMessageBox::Ok);
+        msgBox->setDefaultButton(QMessageBox::Ok);
+        msgBox->setAttribute(Qt::WA_DeleteOnClose);
+        msgBox->exec();
         return;
     }
 

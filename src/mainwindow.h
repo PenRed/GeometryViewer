@@ -15,6 +15,11 @@
 #include <QMenu>
 #include <QDialogButtonBox>
 #include <QColorDialog>
+#include <QFuture>
+#include <QtConcurrent>
+#include <QMessageBox>
+#include <QProgressBar>
+#include <QProgressDialog>
 #include "viewer.h"
 #include "pen_geoViewInterface.hh"
 
