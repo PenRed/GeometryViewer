@@ -40,8 +40,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Concurrent)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Concurrent)
 
 set(PROJECT_SOURCES
         textconfig.h
@@ -78,7 +78,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(GeometryViewer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(GeometryViewer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Concurrent)
 
 set_target_properties(GeometryViewer PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
@@ -89,6 +89,7 @@ set_target_properties(GeometryViewer PROPERTIES
 )
 
 if(BUILD_VIEW_SHARED_LIB)
+    ADD_DEPENDENCIES(GeometryViewer PenRed)
     add_custom_command(
             TARGET ${PROJECT_NAME}  POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
