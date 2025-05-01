@@ -29,10 +29,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Debug - List directory contents
-        if: matrix.os.name == 'linux'
-        run: ls -R
-
       - name: Install pip
         if: matrix.os.name == 'linux'
         run: |
@@ -66,7 +62,7 @@ jobs:
 
       - name: Create building folder
         run: |
-          mkdir ${{ github.workspace }}/src/build
+          mkdir src/build
     
       - name: Build the geometry viewer and bundle dependencies
         shell: bash
