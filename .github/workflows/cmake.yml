@@ -27,6 +27,11 @@ jobs:
     container: ${{ matrix.os.container }}
     steps:            
       - uses: actions/checkout@v3
+
+      - name: Install pip
+        if: matrix.os.name == 'linux'
+        run: |
+          python3 -m ensurepip --upgrade
     
       - name: Install Qt manylinux
         if: matrix.os.name == 'linux'
