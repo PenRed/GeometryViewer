@@ -28,6 +28,11 @@ jobs:
     steps:            
       - uses: actions/checkout@v3
 
+      - name: Ensure sudo is available
+        if: matrix.os.name == 'linux'
+        run: |
+          apt-get install -y sudo
+    
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
         with:
