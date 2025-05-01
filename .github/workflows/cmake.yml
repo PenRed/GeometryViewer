@@ -23,7 +23,7 @@ jobs:
         os:
           - { runner: ubuntu-latest, container: 'quay.io/pypa/manylinux_2_28_x86_64', name: linux }
           - { runner: windows-latest, container: '', name: windows }
-          - { runner: macos-latest, container: '', name: macos }
+          - { runner: macos-latest, container: '', name: mac }
     container: ${{ matrix.os.container }}
     steps:            
       - uses: actions/checkout@v3
@@ -53,7 +53,7 @@ jobs:
             cmake --build . --config Release
             cd Release
             windeployqt GeometryViewer.exe --pdb --release          
-          elif [[ "${{ matrix.os.name }}" == "macos" ]]; then
+          elif [[ "${{ matrix.os.name }}" == "mac" ]]; then
             cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
             cmake --build . --config Release
             mkdir Release
@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           # Set architecture-specific flags for macOS
-          if [[ "${{ matrix.os.name }}" == "macos" ]]; then
+          if [[ "${{ matrix.os.name }}" == "mac" ]]; then
             ARCH_FLAGS="-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64"
           else
             ARCH_FLAGS=""
@@ -120,7 +120,7 @@ jobs:
             ${{ github.workspace }}\src\build\Release
 
       - name: Save macos artifacts
-        if: matrix.os.name == 'macos'
+        if: matrix.os.name == 'mac'
         uses: actions/upload-artifact@master
         with:
           name: geometryViewer-${{ matrix.os.name }}
