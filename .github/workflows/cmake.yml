@@ -31,7 +31,7 @@ jobs:
       - name: Ensure sudo is available
         if: matrix.os.name == 'linux'
         run: |
-          apt-get install -y sudo
+          yum install -y sudo
     
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
