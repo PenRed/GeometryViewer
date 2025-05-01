@@ -28,7 +28,8 @@ jobs:
     steps:            
       - uses: actions/checkout@v3
     
-      - name: Install Qt
+      - name: Install Qt manylinux
+        if: matrix.os.name == 'linux'
         uses: jurplel/install-qt-action@v3
         with:
           version:      ${{ env.QT_VERSION }}
@@ -37,6 +38,19 @@ jobs:
           dir:          ${{ runner.temp }}
           setup-python: 'false'
           install-deps: 'false'
+          cache: 'false'
+          set-env: 'true'
+
+      - name: Install Qt
+        if: matrix.os.name != 'linux'
+        uses: jurplel/install-qt-action@v3
+        with:
+          version:      ${{ env.QT_VERSION }}
+          host:         ${{ matrix.os.name }}
+          target:       desktop
+          dir:          ${{ runner.temp }}
+          setup-python: 'true'
+          install-deps: 'true'
           cache: 'false'
           set-env: 'true'
 
