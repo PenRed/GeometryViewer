@@ -35,7 +35,7 @@ jobs:
           host:         ${{ matrix.os.name }}
           target:       desktop
           dir:          ${{ runner.temp }}
-          setup-python: 'true'
+          setup-python: 'false'
           install-deps: 'false'
           cache: 'false'
           set-env: 'true'
