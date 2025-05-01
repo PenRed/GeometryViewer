@@ -28,10 +28,17 @@ jobs:
     steps:            
       - uses: actions/checkout@v3
 
-      - name: Ensure sudo is available
+      - name: Install dependencies for Qt
         if: matrix.os.name == 'linux'
         run: |
-          yum install -y sudo
+          yum install -y libxcb libxcb-devel libX11-xcb libX11-xcb-devel \
+            libxcb-glx libxcb-glx-devel libxcb-keysyms libxcb-keysyms-devel \
+            libxcb-image libxcb-image-devel libxcb-shm libxcb-shm-devel \
+            libxcb-icccm libxcb-icccm-devel libxcb-render libxcb-render-devel \
+            libxcb-randr libxcb-randr-devel libxcb-util libxcb-util-devel \
+            libxcb-xinerama libxcb-xinerama-devel libxcb-xkb libxcb-xkb-devel \
+            xcb-util-wm xcb-util-wm-devel fontconfig fontconfig-devel \
+            freetype freetype-devel
     
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -41,7 +48,7 @@ jobs:
           target:       desktop
           dir:          ${{ runner.temp }}
           setup-python: 'true'
-          install-deps: 'true'
+          install-deps: 'false'
           cache: 'false'
           set-env: 'true'
 
