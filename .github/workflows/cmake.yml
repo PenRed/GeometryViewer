@@ -82,9 +82,9 @@ jobs:
           else
             cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_VIEW_SHARED_LIB="OFF" -Wno-dev ../
             cmake --build . --config Release
-            cp ${{ github.workspace }}/bundle.sh bundle.sh
+            cp ../../bundle.sh bundle.sh
             bash bundle.sh ${{ env.Qt6_DIR }}            
-            mv ${{ github.workspace }}/GeometryViewer.sh GeometryViewer.sh
+            cp ../../GeometryViewer.sh GeometryViewer.sh
             chmod +x GeometryViewer
           fi
         working-directory: ${{ github.workspace }}/src/build
