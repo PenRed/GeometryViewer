@@ -120,6 +120,7 @@ jobs:
             mv PenRed\\src\\bindings\\C\\viewers\\geometry\\geoView_C.dll Release\\libgeoView_C.dll
           else
             mv PenRed/src/bindings/C/viewers/geometry/libgeoView_C.dylib Release/libgeoView_C.dylib          
+          fi
         
       - name: Save linux artifacts
         if: matrix.os.name == 'linux'
