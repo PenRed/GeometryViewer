@@ -106,7 +106,7 @@ jobs:
         
           mkdir build
           cd build
-          cmake $ARCH_FLAGS -DCMAKE_BUILD_TYPE=Release -DBUILD_C_BINDS=ON -DWITH_NATIVE=OFF -DWITH_DICOM=ON -DWITH_MULTI_THREADING=ON -DWITH_EMBEDDED_DB=OFF ..
+          cmake $ARCH_FLAGS -DCMAKE_BUILD_TYPE=Release -DBUILD_C_BINDS=ON -DWITH_NATIVE=OFF -DWITH_DICOM=OFF -DWITH_MULTI_THREADING=ON -DWITH_EMBEDDED_DB=OFF ..
           cmake --build . --target install --config Release -j 4
         working-directory: ${{ github.workspace }}/src/build/PenRed/src
 
