@@ -15,7 +15,6 @@ ldd GeometryViewer | awk '/=>/ {print $3}' | grep -i qt | while read -r lib; do
     cp "$lib" lib/
 done
 
-ldd GeometryViewer | cut -d'>' -f2 | cut -d' ' -f2 | grep "/" | xargs -I % cp % lib/
 find ${QTDIR}/lib -name libQt*XcbQ* | xargs -I % cp % lib/
 find ${QTDIR}/lib -name "*Wayland*" | grep ".so" | xargs -I % cp % lib/
 find ${QTDIR}/lib -name "*OpenGL*" | grep ".so" | xargs -I % cp % lib/
