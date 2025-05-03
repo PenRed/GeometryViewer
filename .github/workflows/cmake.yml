@@ -121,33 +121,26 @@ jobs:
           else
             mv PenRed/src/bindings/C/viewers/geometry/libgeoView_C.dylib Release/libgeoView_C.dylib          
           fi
+
+      - name: Create application bundle
+        shell: bash
+        run:  |
+          mkdir geometryViewer-${{ matrix.os.name }}
+          if [[ "${{ matrix.os.name }}" == "linux" ]]; then
+            mv src/build/GeometryViewer \
+              src/build/GeometryViewer.sh \
+              src/build/libgeoView* \
+              src/build/lib \
+              src/build/platforms \
+              src/build/plugins \
+              geometryViewer-${{ matrix.os.name }}/
+          else
+            mv src/build/Release/* geometryViewer-${{ matrix.os.name }}/
+          fi
         
-      - name: Save linux artifacts
-        if: matrix.os.name == 'linux'
+      - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
           name: geometryViewer-${{ matrix.os.name }}
-          path: | 
-            src/build/GeometryViewer
-            src/build/GeometryViewer.sh
-            src/build/libgeoView*
-            src/build/lib
-            src/build/platforms
-            src/build/plugins
-
-      - name: Save windows artifacts
-        if: matrix.os.name == 'windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: geometryViewer-${{ matrix.os.name }}
-          path: | 
-            src\build\Release
-
-      - name: Save macos artifacts
-        if: matrix.os.name == 'mac'
-        uses: actions/upload-artifact@v4
-        with:
-          name: geometryViewer-${{ matrix.os.name }}
-          path: | 
-            src/build/Release
+          path: geometryViewer-${{ matrix.os.name }}/
             
