@@ -124,30 +124,30 @@ jobs:
         
       - name: Save linux artifacts
         if: matrix.os.name == 'linux'
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4
         with:
           name: geometryViewer-${{ matrix.os.name }}
           path: | 
-            ${{ github.workspace }}/src/build/GeometryViewer
-            ${{ github.workspace }}/src/build/GeometryViewer.sh
-            ${{ github.workspace }}/src/build/libgeoView*
-            ${{ github.workspace }}/src/build/lib
-            ${{ github.workspace }}/src/build/platforms
-            ${{ github.workspace }}/src/build/plugins
+            src/build/GeometryViewer
+            src/build/GeometryViewer.sh
+            src/build/libgeoView*
+            src/build/lib
+            src/build/platforms
+            src/build/plugins
 
       - name: Save windows artifacts
         if: matrix.os.name == 'windows'
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4
         with:
           name: geometryViewer-${{ matrix.os.name }}
           path: | 
-            ${{ github.workspace }}\src\build\Release
+            src\build\Release
 
       - name: Save macos artifacts
         if: matrix.os.name == 'mac'
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4
         with:
           name: geometryViewer-${{ matrix.os.name }}
           path: | 
-            ${{ github.workspace }}/src/build/Release
+            src/build/Release
             
