@@ -10,7 +10,11 @@ mkdir lib
 mkdir platforms
 mkdir plugins
 
-#ldd GeometryViewer | grep "Qt" | cut -d'>' -f2 | cut -d' ' -f2 | xargs -I % cp % lib/
+# Copy ONLY Qt libraries that are actually used (via ldd), avoiding system libs
+ldd GeometryViewer | awk '/=>/ {print $3}' | grep -i qt | while read -r lib; do
+    cp "$lib" lib/
+done
+
 ldd GeometryViewer | cut -d'>' -f2 | cut -d' ' -f2 | grep "/" | xargs -I % cp % lib/
 find ${QTDIR}/lib -name libQt*XcbQ* | xargs -I % cp % lib/
 find ${QTDIR}/lib -name "*Wayland*" | grep ".so" | xargs -I % cp % lib/
