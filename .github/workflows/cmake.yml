@@ -134,16 +134,17 @@ jobs:
               src/build/platforms \
               src/build/plugins \
               geometryViewer-${{ matrix.os.name }}/
+            tar -czvf geometryViewer-${{ matrix.os.name }}.tar.gz geometryViewer-${{ matrix.os.name }}/
           else
             mv src/build/Release/* geometryViewer-${{ matrix.os.name }}/
+            zip -r geometryViewer-${{ matrix.os.name }}.zip geometryViewer-${{ matrix.os.name }}/
           fi
 
-          # Zip files
-          zip -r geometryViewer-${{ matrix.os.name }}.zip geometryViewer-${{ matrix.os.name }}/
         
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
           name: geometryViewer-${{ matrix.os.name }}
-          path: geometryViewer-${{ matrix.os.name }}.zip
-            
+          path: |
+            geometryViewer-${{ matrix.os.name }}.zip
+            geometryViewer-${{ matrix.os.name }}.tar.gz
