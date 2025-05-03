@@ -137,10 +137,13 @@ jobs:
           else
             mv src/build/Release/* geometryViewer-${{ matrix.os.name }}/
           fi
+
+          # Zip files
+          zip -r geometryViewer-${{ matrix.os.name }}.zip geometryViewer-${{ matrix.os.name }}/
         
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
           name: geometryViewer-${{ matrix.os.name }}
-          path: geometryViewer-${{ matrix.os.name }}/
+          path: geometryViewer-${{ matrix.os.name }}.zip
             
