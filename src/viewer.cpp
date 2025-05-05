@@ -339,10 +339,6 @@ void viewer::updateMatView(){
     //Set the image in the label
     std::array<bool,nColors> visibleColors{false};
 
-    const char* matString  = " Material ";
-    const char* bodyString = "   Body   ";
-    const char* pMatBody = matString;
-
     unsigned int renderWidth;
     unsigned int renderHeight;
     if(perspective == 3){ //3D
@@ -376,7 +372,6 @@ void viewer::updateMatView(){
                 }
             }
         }else{
-            pMatBody = bodyString;
             for(size_t i = 0; i < nRenderPixels; ++i){
                 size_t index = i*3;
                 unsigned ibody = bodyImage[i];
@@ -420,7 +415,6 @@ void viewer::updateMatView(){
                 }
             }
         }else{
-            pMatBody = bodyString;
             for(size_t i = 0; i < nRenderPixels; ++i){
                 size_t index = i*3;
                 unsigned ibody = bodyImage[i];
@@ -453,8 +447,18 @@ void viewer::updateMatView(){
             if(included % 3 == 0 && included > 0){
                 keyText.append(" </tr>\n<tr>");
             }
+
+            std::string text2show;
+            if(matView){
+                const char* matString  = " Material ";
+                text2show = matString + std::to_string(i);
+            }else{
+                std::string bodyName = pPenRedViewer->getBodyName(i);
+                text2show = bodyName.substr(0,20); //Cut long body names to 20 characters
+            }
+
             size_t index = i*3;
-            keyText.append(std::string("<th style=\"color:rgb(" + std::to_string(viewer::colors[index]) + "," + std::to_string(viewer::colors[index+1]) + "," + std::to_string(viewer::colors[index+2]) + ")\"> " + pMatBody + std::to_string(i) + " </th>\n").c_str());
+            keyText.append(std::string("<th style=\"color:rgb(" + std::to_string(viewer::colors[index]) + "," + std::to_string(viewer::colors[index+1]) + "," + std::to_string(viewer::colors[index+2]) + ")\"> " + text2show + " </th>\n").c_str());
             ++included;
         }
     }

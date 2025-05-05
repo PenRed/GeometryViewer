@@ -32,7 +32,6 @@
 #ifndef __PEN_GEO_VIEWER__
 
 #include <cstdio>
-#include <array>
 #include <vector>
 
 struct geoError{
@@ -52,6 +51,10 @@ class pen_geoViewInterface{
 private:
 
 public:
+
+  virtual unsigned getBodies() const = 0;
+
+  virtual std::string getBodyName(const unsigned ibody) const = 0;
   
   virtual double z2dir(const double u,
 		       const double v,
