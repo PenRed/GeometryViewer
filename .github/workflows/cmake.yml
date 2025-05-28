@@ -92,7 +92,7 @@ jobs:
 
       - name: Clone PenRed
         run: |
-          git clone https://github.com/PenRed/PenRed --single-branch --branch ${{ github.event.inputs.branch }}
+          git clone https://github.com/PenRed/PenRed --single-branch --branch "${{ github.event.inputs.branch || 'master' }}"
         working-directory: ${{ github.workspace }}/src/build
       
       - name: Build the PenRed shared lib
