@@ -33,6 +33,7 @@ jobs:
         if: matrix.os.name == 'linux'
         run: |
           python3 -m ensurepip --upgrade
+          yum install -y libxkbcommon-devel
     
       - name: Install Qt manylinux
         if: matrix.os.name == 'linux'
