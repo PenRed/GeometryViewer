@@ -63,6 +63,12 @@ private slots:
 
     void on_Zedit_editingFinished();
 
+    void on_Tedit_valueChanged(double arg1);
+
+    void on_TStepEdit_valueChanged(double arg1);
+
+    void on_playButton_released();
+
     void on_matBodyViewButton_released();
 
     void on_perspectiveSelector_currentIndexChanged(int index);
@@ -143,6 +149,10 @@ private:
     unsigned width3D, height3D;
     double pixelSize3D;
 
+    std::shared_ptr<QTimer> animationTimer;
+    bool playing;
+
+
     Ui::MainWindow *ui;
 
     void setActiveViewer(unsigned index);
@@ -165,6 +175,15 @@ private:
     }
     void loadViewerColors(const QString &file);
     void saveViewerColors(const QString &file);
+
+    void updateTime();
+    void toggleAnimation();
+    inline bool isPlaying(){ return playing; }
+    inline void stopAnimation(){
+        if(isPlaying()){
+            toggleAnimation();
+        }
+    }
 
 };
 #endif // MAINWINDOW_H

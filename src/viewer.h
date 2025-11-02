@@ -52,6 +52,8 @@ private:
     QPixmap pixMap;
 
     double x, y, z;
+    double t, dt;
+    bool playing;
     double xlast, ylast, zlast; //Last x,y,z values
     //3D camera position perspective
     double camera3DX, camera3DY, camera3DZ;
@@ -94,6 +96,8 @@ public:
     static std::array<unsigned char, viewer::nColorsPos> defaultColors();
     static void resetColors();
 
+    void increaseTime();
+
     void copy(const viewer& viewer2copy);
 
     void render(bool moveOnPlane = false, unsigned char direction = 0, unsigned nPixels = 0);
@@ -110,6 +114,9 @@ public:
     constexpr double readX() const {return x;}
     constexpr double readY() const {return y;}
     constexpr double readZ() const {return z;}
+
+    constexpr double readTime() const {return t;}
+    constexpr double readDTime() const {return dt;}
 
     constexpr double readRho() const {return rho;}
     constexpr double readTheta() const {return theta;}
@@ -139,6 +146,9 @@ public:
     void setX(double newX);
     void setY(double newY);
     void setZ(double newZ);
+
+    void setTime(double newT);
+    void setDTime(double newDT);
 
     void setRho(double newRho);
     void setTheta(double newTheta);

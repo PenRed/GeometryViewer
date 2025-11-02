@@ -7,10 +7,17 @@ MainWindow::MainWindow(QWidget *parent)
       penRedViewer(nullptr),
       constructViewer(nullptr),
       destroyViewer(nullptr),
-      width3D(400), height3D(400), pixelSize3D(0.1)
+      width3D(400), height3D(400), pixelSize3D(0.1),
+      playing(false)
 {
     //Init viewer colors
     viewer::resetColors();
+
+    //Create the animation timer
+    animationTimer = std::make_shared<QTimer>(this);
+
+    animationTimer->setTimerType(Qt::PreciseTimer);
+    connect(animationTimer.get(), &QTimer::timeout, this, &MainWindow::updateTime);
 
     setWindowTitle("PenRed Geometry Viewer");
 
@@ -30,6 +37,11 @@ MainWindow::MainWindow(QWidget *parent)
          << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::PicturesLocation).first())
          << QUrl::fromLocalFile(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first());
 
+
+    // Get home directory path
+    QString homeDir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first();
+
+    saveDialog.setDirectory(homeDir);  // Start in home directory
     saveDialog.setSidebarUrls(urls);
     saveDialog.setFileMode(QFileDialog::AnyFile);
     saveDialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -37,16 +49,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     //Configure load dialogs
 
+    loadConfigDialog.setDirectory(homeDir);  // Start in home directory
     loadConfigDialog.setSidebarUrls(urls);
     loadConfigDialog.setFileMode(QFileDialog::ExistingFile);
     loadConfigDialog.setAcceptMode(QFileDialog::AcceptOpen);
     connect(&loadConfigDialog, &QFileDialog::fileSelected, this, &MainWindow::on_loadConfig);
 
+    loadQuadricDialog.setDirectory(homeDir);  // Start in home directory
     loadQuadricDialog.setSidebarUrls(urls);
     loadQuadricDialog.setFileMode(QFileDialog::ExistingFile);
     loadQuadricDialog.setAcceptMode(QFileDialog::AcceptOpen);
     connect(&loadQuadricDialog, &QFileDialog::fileSelected, this, &MainWindow::on_loadQuadric);
 
+    loadMeshDialog.setDirectory(homeDir);  // Start in home directory
     loadMeshDialog.setSidebarUrls(urls);
     loadMeshDialog.setFileMode(QFileDialog::ExistingFile);
     loadMeshDialog.setAcceptMode(QFileDialog::AcceptOpen);
@@ -366,11 +381,26 @@ void MainWindow::on_loadConfig(const QString &file){
     //Initialize the viewer in another thread
     QFuture<int> future = QtConcurrent::run([this, file]{
 
+        qInfo() << "Selected configuration file " << file << "\n";
+        QFileInfo fileInfo(file);
+        QString directoryPath = fileInfo.absolutePath();
+        QString originalWorkingDir = QDir::currentPath();
+
+        qInfo() << "Changing directory to " << directoryPath << "\n";
+
+        // Qt handles the platform-specific implementation
+        if (!QDir::setCurrent(directoryPath)) {
+            qWarning() << "Could not change to directory:" << directoryPath << "\n";
+        }
+
+        qInfo() << "Loading configuration file";
+
         int err = penRedViewer->init(file.toStdString().c_str());
         if(err != 0){
-            printf("Error loading the geometry\n");
-            fflush(stdout);
+            qWarning() << "Error loading the geometry";
         }
+        qInfo() << "Returning to original directory " << originalWorkingDir << "\n";
+        QDir::setCurrent(originalWorkingDir);
         return err;
     });
 
@@ -549,6 +579,13 @@ void MainWindow::setActiveViewer(unsigned index){
 
     if(viewersArray[activeViewer] != nullptr)
         viewersArray[activeViewer]->setStyleSheet("border: none");
+    if(activeViewer != index){
+        stopAnimation();
+        ui->playButton->setIcon(QIcon::fromTheme("media-playback-start"));
+        if (ui->playButton->icon().isNull()) {
+            ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        }
+    }
     activeViewer = index;
     viewersArray[activeViewer]->setStyleSheet("border: 5px outset rgb(0,128,255); border-radius: 4px;");
 
@@ -585,6 +622,9 @@ void MainWindow::updateViewerInfo(){
     ui->lookX->setText(QString::number(pviewer->readCamera3DX(), 'e', 5));
     ui->lookY->setText(QString::number(pviewer->readCamera3DY(), 'e', 5));
     ui->lookZ->setText(QString::number(pviewer->readCamera3DZ(), 'e', 5));
+
+    ui->Tedit->setValue(pviewer->readTime());
+    ui->TStepEdit->setValue(pviewer->readDTime());
 
     updateKey();
 }
@@ -652,6 +692,55 @@ void MainWindow::on_Zedit_editingFinished()
     ui->Zedit->setText(QString::number(value, 'e', 5));
     if(viewersArray[activeViewer] != nullptr){
         viewersArray[activeViewer]->setZ(value);
+        updateKey();
+    }
+}
+
+void MainWindow::on_Tedit_valueChanged(double arg1){
+    if(viewersArray[activeViewer] != nullptr){
+        viewersArray[activeViewer]->setTime(arg1);
+        updateKey();
+    }
+}
+
+void MainWindow::on_playButton_released(){
+    if(viewersArray[activeViewer] != nullptr){
+        toggleAnimation();
+        updateKey();
+    }
+}
+
+void MainWindow::updateTime() {
+    if(viewersArray[activeViewer] != nullptr){
+        if(isPlaying()){
+            viewersArray[activeViewer]->increaseTime();
+            ui->Tedit->setValue(viewersArray[activeViewer]->readTime());
+        }
+    }
+}
+
+void MainWindow::toggleAnimation(){
+    if(isPlaying()){
+        animationTimer->stop();
+        ui->playButton->setIcon(QIcon::fromTheme("media-playback-start"));
+        if (ui->playButton->icon().isNull()) {
+            ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        }
+    } else {
+        animationTimer->start(500); //Update every 500 ms
+        ui->playButton->setIcon(QIcon::fromTheme("media-playback-pause"));
+
+        // Fallback if theme icon not available
+        if(ui->playButton->icon().isNull()) {
+            ui->playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+        }
+    }
+    playing = !playing;
+}
+
+void MainWindow::on_TStepEdit_valueChanged(double arg1){
+    if(viewersArray[activeViewer] != nullptr){
+        viewersArray[activeViewer]->setDTime(arg1);
         updateKey();
     }
 }

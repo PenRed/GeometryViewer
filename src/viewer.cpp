@@ -8,7 +8,7 @@ viewer::viewer(std::vector<uchar>& bufferIn,
                std::vector<float>& distancesIn,
                QWidget *parent)
     : QWidget{parent}, buffer(bufferIn), matImage(matImageIn), bodyImage(bodyImageIn), distances(distancesIn),
-      x(0.0), y(0.0), z(0.0), xlast(0.0), ylast(0.0), zlast(0.0), camera3DX(0.0), camera3DY(0.0), camera3DZ(0.0),
+    x(0.0), y(0.0), z(0.0), t(0.0), dt(0.5), playing(false), xlast(0.0), ylast(0.0), zlast(0.0), camera3DX(0.0), camera3DY(0.0), camera3DZ(0.0),
       u(0.0), v(0.0), w(1.0), rho(10.0), theta(1.5707963267948966), phi(0.0), omega(-1.5707963267948966), lastRender3DPhi(0.0),
       perspective(0), matView(true), pixelSize(0.1), pixelSize3D(0.1), pPenRedViewer(nullptr), geometryLoaded(false)
 {
@@ -250,77 +250,77 @@ void viewer::render(bool moveOnPlane, unsigned char direction, unsigned nPixels)
                 switch(direction){
                     case 0:
                         pPenRedViewer->renderXtoLeft(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 1:
                         pPenRedViewer->renderXtoRight(matImage.data(), bodyImage.data(), nPixels,
-                                                      xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                      xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 2:
                         pPenRedViewer->renderXtoUp(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 3:
                         pPenRedViewer->renderXtoDown(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                 }
             }else{
                 pPenRedViewer->renderX(matImage.data(), bodyImage.data(),
-                                       x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, nthreads);
+                                       x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, t, nthreads);
             }
         }else if(perspective == 1){
             if(moveOnPlane){
                 switch(direction){
                     case 0:
                         pPenRedViewer->renderYtoLeft(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 1:
                         pPenRedViewer->renderYtoRight(matImage.data(), bodyImage.data(), nPixels,
-                                                      xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                      xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 2:
                         pPenRedViewer->renderYtoUp(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 3:
                         pPenRedViewer->renderYtoDown(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                 }
             }else{
                 pPenRedViewer->renderY(matImage.data(), bodyImage.data(),
-                                       x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, nthreads);
+                                       x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, t, nthreads);
             }
         }else if(perspective == 2){
             if(moveOnPlane){
                 switch(direction){
                     case 0:
                         pPenRedViewer->renderZtoLeft(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 1:
                         pPenRedViewer->renderZtoRight(matImage.data(), bodyImage.data(), nPixels,
-                                                      xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                      xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 2:
                         pPenRedViewer->renderZtoUp(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                     case 3:
                         pPenRedViewer->renderZtoDown(matImage.data(), bodyImage.data(), nPixels,
-                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight);
+                                                     xlast, ylast, zlast, pixelSize, pixelSize, imageWidth, imageHeight, t);
                         break;
                 }
             }else{
                 pPenRedViewer->renderZ(matImage.data(), bodyImage.data(),
-                                       x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, nthreads);
+                                       x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, t, nthreads);
             }
         }else if(perspective == 3){
 
             pPenRedViewer->render3D(matImage.data(), bodyImage.data(),
-                                    camera3DX, camera3DY, camera3DZ, u, v, w, omega, lastRender3DPhi, distances.data(), minD, maxD);
+                                    camera3DX, camera3DY, camera3DZ, u, v, w, t, omega, lastRender3DPhi, distances.data(), minD, maxD);
         }
 
         xlast = x;
@@ -517,13 +517,13 @@ std::vector<geoError> viewer::test() const{
     if(pPenRedViewer != nullptr && geometryLoaded){
         if(perspective == 0){
             pPenRedViewer->testX(errors,
-                                   x,y,z, pixelSize, pixelSize, imageWidth, imageHeight);
+                                   x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, t);
         }else if(perspective == 1){
             pPenRedViewer->testY(errors,
-                                   x,y,z, pixelSize, pixelSize, imageWidth, imageHeight);
+                                   x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, t);
         }else if(perspective == 2){
             pPenRedViewer->testZ(errors,
-                                   x,y,z, pixelSize, pixelSize, imageWidth, imageHeight);
+                                   x,y,z, pixelSize, pixelSize, imageWidth, imageHeight, t);
 
         }else if(perspective == 3){
             //TODO
@@ -569,6 +569,20 @@ void viewer::setY(double newY){
 }
 void viewer::setZ(double newZ){
     z = newZ;
+    render();
+}
+
+void viewer::setTime(double newT){
+    t = newT;
+    render();
+}
+
+void viewer::setDTime(double newDT){
+    dt = newDT;
+}
+
+void viewer::increaseTime(){
+    t += dt;
     render();
 }
 
