@@ -3,7 +3,7 @@
 std::array<unsigned char, viewer::nColorsPos> viewer::colors;
 
 viewer::viewer(std::vector<uchar>& bufferIn,
-               std::vector<unsigned char>& matImageIn,
+               std::vector<unsigned int>& matImageIn,
                std::vector<unsigned int>& bodyImageIn,
                std::vector<float>& distancesIn,
                QWidget *parent)
@@ -511,9 +511,9 @@ void viewer::resizeImage(){
     label.setPixmap(scaledPixMap);
 }
 
-std::vector<geoError> viewer::test() const{
+std::vector<penred::geometry::viewError> viewer::test() const{
 
-    std::vector<geoError> errors;
+    std::vector<penred::geometry::viewError> errors;
     if(pPenRedViewer != nullptr && geometryLoaded){
         if(perspective == 0){
             pPenRedViewer->testX(errors,
@@ -543,7 +543,7 @@ void viewer::update3D(unsigned width, unsigned height, double pixSize){
 
 //Setter functions
 
-void viewer::setViewer(const pen_geoViewInterface* p, const bool _geometryLoaded){
+void viewer::setViewer(const penred::geometry::ViewerInterface* p, const bool _geometryLoaded){
     geometryLoaded = _geometryLoaded;
     pPenRedViewer = p;
 }

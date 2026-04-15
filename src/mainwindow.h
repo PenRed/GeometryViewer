@@ -122,11 +122,11 @@ signals:
 private:
 
     std::array<std::vector<uchar>,maxViewers> buffers;
-    std::array<std::vector<unsigned char>,maxViewers> matImages;
+    std::array<std::vector<unsigned int>,maxViewers> matImages;
     std::array<std::vector<unsigned int>,maxViewers> bodyImages;
     std::array<std::vector<float>,maxViewers> distances;
 
-    pen_geoViewInterface* penRedViewer;
+    penred::geometry::ViewerInterface* penRedViewer;
     QLibrary viewerLib;
 
     QFileDialog saveDialog;
@@ -138,9 +138,9 @@ private:
     QVBoxLayout* colorListLayout;
     QColorDialog* selectColorDialog;
 
-    typedef pen_geoViewInterface* (*viewerConstructor)();
+    typedef penred::geometry::ViewerInterface* (*viewerConstructor)();
     viewerConstructor constructViewer;
-    typedef void (*viewerDestructor)(pen_geoViewInterface*);
+    typedef void (*viewerDestructor)(penred::geometry::ViewerInterface*);
     viewerDestructor destroyViewer;
 
     unsigned nViewers;

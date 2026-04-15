@@ -837,7 +837,7 @@ void MainWindow::on_testButton_released()
         QElapsedTimer timer;
         timer.start();
 
-        std::vector<geoError> errors = viewersArray[activeViewer]->test();
+        std::vector<penred::geometry::viewError> errors = viewersArray[activeViewer]->test();
 
         qint64 elapsed = timer.elapsed();
 

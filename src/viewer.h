@@ -38,7 +38,7 @@ private:
     static constexpr double stheta = 0.08715574274765817;
 
     std::vector<uchar>& buffer;
-    std::vector<unsigned char>& matImage;
+    std::vector<unsigned int>& matImage;
     std::vector<unsigned int>& bodyImage;
     std::vector<float>& distances;
     float minD, maxD;
@@ -71,7 +71,7 @@ private:
     double pixelSize; //in cm
     double pixelSize3D; //in cm
 
-    const pen_geoViewInterface* pPenRedViewer;
+    const penred::geometry::ViewerInterface* pPenRedViewer;
 
     QString keyText; //HTML text with key table
 
@@ -88,7 +88,7 @@ protected:
 public:
 
     explicit viewer(std::vector<uchar>& bufferIn,
-                    std::vector<unsigned char>& matImageIn,
+                    std::vector<unsigned int>& matImageIn,
                     std::vector<unsigned int>& bodyImage,
                     std::vector<float>& distancesIn,
                     QWidget *parent = nullptr);
@@ -103,7 +103,7 @@ public:
     void render(bool moveOnPlane = false, unsigned char direction = 0, unsigned nPixels = 0);
     void resizeImage();
     void updateMatView();
-    std::vector<geoError> test() const;
+    std::vector<penred::geometry::viewError> test() const;
 
     //Getter functions
     constexpr const QImage& readImage() const {return image;}
@@ -138,7 +138,7 @@ public:
 
     //Setter functions
 
-    void setViewer(const pen_geoViewInterface* p, const bool _geometryLoaded = false);
+    void setViewer(const penred::geometry::ViewerInterface* p, const bool _geometryLoaded = false);
 
     void setImageWidth(unsigned width);
     void setImageHeight(unsigned height);
