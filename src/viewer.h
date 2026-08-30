@@ -38,7 +38,7 @@ private:
     static constexpr double stheta = 0.08715574274765817;
 
     std::vector<uchar>& buffer;
-    std::vector<unsigned char>& matImage;
+    std::vector<unsigned int>& matImage;
     std::vector<unsigned int>& bodyImage;
     std::vector<float>& distances;
     float minD, maxD;
@@ -52,6 +52,8 @@ private:
     QPixmap pixMap;
 
     double x, y, z;
+    double t, dt;
+    bool playing;
     double xlast, ylast, zlast; //Last x,y,z values
     //3D camera position perspective
     double camera3DX, camera3DY, camera3DZ;
@@ -69,7 +71,7 @@ private:
     double pixelSize; //in cm
     double pixelSize3D; //in cm
 
-    const pen_geoViewInterface* pPenRedViewer;
+    const penred::geometry::ViewerInterface* pPenRedViewer;
 
     QString keyText; //HTML text with key table
 
@@ -86,7 +88,7 @@ protected:
 public:
 
     explicit viewer(std::vector<uchar>& bufferIn,
-                    std::vector<unsigned char>& matImageIn,
+                    std::vector<unsigned int>& matImageIn,
                     std::vector<unsigned int>& bodyImage,
                     std::vector<float>& distancesIn,
                     QWidget *parent = nullptr);
@@ -94,12 +96,14 @@ public:
     static std::array<unsigned char, viewer::nColorsPos> defaultColors();
     static void resetColors();
 
+    void increaseTime();
+
     void copy(const viewer& viewer2copy);
 
     void render(bool moveOnPlane = false, unsigned char direction = 0, unsigned nPixels = 0);
     void resizeImage();
     void updateMatView();
-    std::vector<geoError> test() const;
+    std::vector<penred::geometry::viewError> test() const;
 
     //Getter functions
     constexpr const QImage& readImage() const {return image;}
@@ -110,6 +114,9 @@ public:
     constexpr double readX() const {return x;}
     constexpr double readY() const {return y;}
     constexpr double readZ() const {return z;}
+
+    constexpr double readTime() const {return t;}
+    constexpr double readDTime() const {return dt;}
 
     constexpr double readRho() const {return rho;}
     constexpr double readTheta() const {return theta;}
@@ -131,7 +138,7 @@ public:
 
     //Setter functions
 
-    void setViewer(const pen_geoViewInterface* p, const bool _geometryLoaded = false);
+    void setViewer(const penred::geometry::ViewerInterface* p, const bool _geometryLoaded = false);
 
     void setImageWidth(unsigned width);
     void setImageHeight(unsigned height);
@@ -139,6 +146,9 @@ public:
     void setX(double newX);
     void setY(double newY);
     void setZ(double newZ);
+
+    void setTime(double newT);
+    void setDTime(double newDT);
 
     void setRho(double newRho);
     void setTheta(double newTheta);

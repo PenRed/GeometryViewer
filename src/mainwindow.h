@@ -63,6 +63,12 @@ private slots:
 
     void on_Zedit_editingFinished();
 
+    void on_Tedit_valueChanged(double arg1);
+
+    void on_TStepEdit_valueChanged(double arg1);
+
+    void on_playButton_released();
+
     void on_matBodyViewButton_released();
 
     void on_perspectiveSelector_currentIndexChanged(int index);
@@ -116,11 +122,11 @@ signals:
 private:
 
     std::array<std::vector<uchar>,maxViewers> buffers;
-    std::array<std::vector<unsigned char>,maxViewers> matImages;
+    std::array<std::vector<unsigned int>,maxViewers> matImages;
     std::array<std::vector<unsigned int>,maxViewers> bodyImages;
     std::array<std::vector<float>,maxViewers> distances;
 
-    pen_geoViewInterface* penRedViewer;
+    penred::geometry::ViewerInterface* penRedViewer;
     QLibrary viewerLib;
 
     QFileDialog saveDialog;
@@ -132,9 +138,9 @@ private:
     QVBoxLayout* colorListLayout;
     QColorDialog* selectColorDialog;
 
-    typedef pen_geoViewInterface* (*viewerConstructor)();
+    typedef penred::geometry::ViewerInterface* (*viewerConstructor)();
     viewerConstructor constructViewer;
-    typedef void (*viewerDestructor)(pen_geoViewInterface*);
+    typedef void (*viewerDestructor)(penred::geometry::ViewerInterface*);
     viewerDestructor destroyViewer;
 
     unsigned nViewers;
@@ -142,6 +148,10 @@ private:
 
     unsigned width3D, height3D;
     double pixelSize3D;
+
+    std::shared_ptr<QTimer> animationTimer;
+    bool playing;
+
 
     Ui::MainWindow *ui;
 
@@ -165,6 +175,15 @@ private:
     }
     void loadViewerColors(const QString &file);
     void saveViewerColors(const QString &file);
+
+    void updateTime();
+    void toggleAnimation();
+    inline bool isPlaying(){ return playing; }
+    inline void stopAnimation(){
+        if(isPlaying()){
+            toggleAnimation();
+        }
+    }
 
 };
 #endif // MAINWINDOW_H
